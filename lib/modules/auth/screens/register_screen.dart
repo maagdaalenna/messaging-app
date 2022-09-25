@@ -2,20 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:messaging_app/modules/shared/themes/extensions/theme_sizes_extension.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({Key? key}) : super(key: key);
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
   bool _hidePassword = true;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final themeSizes = theme.extension<ThemeSizesExtension>()!; // is not null
+    final themeSizes = theme.extension<ThemeSizesExtension>()!;
 
     return Scaffold(
       backgroundColor: theme.colorScheme.primary,
@@ -57,12 +57,17 @@ class _LoginScreenState extends State<LoginScreen> {
                             decoration: InputDecoration(
                               filled: true,
                               fillColor: theme.colorScheme.secondary,
-                              hintText: "Your email...",
+                              hintText: "Enter your name here...",
+                              label: Text("Full Name"),
+                            ),
+                          ),
+                          SizedBox(height: themeSizes.spacingMedium),
+                          TextField(
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: theme.colorScheme.secondary,
+                              hintText: "Enter your email here...",
                               label: Text("Email Address"),
-                              prefixIcon: Icon(
-                                Icons.mail_outline,
-                                color: theme.colorScheme.primary,
-                              ),
                             ),
                           ),
                           SizedBox(height: themeSizes.spacingMedium),
@@ -73,10 +78,29 @@ class _LoginScreenState extends State<LoginScreen> {
                               fillColor: theme.colorScheme.secondary,
                               hintText: "Enter your password here...",
                               label: Text("Password"),
-                              prefixIcon: Icon(
-                                Icons.lock_outline,
-                                color: theme.colorScheme.primary,
+                              suffixIcon: IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    _hidePassword = !_hidePassword;
+                                  });
+                                },
+                                icon: FaIcon(
+                                  _hidePassword
+                                      ? FontAwesomeIcons.solidEyeSlash
+                                      : FontAwesomeIcons.solidEye,
+                                  color: theme.colorScheme.onSecondary,
+                                ),
                               ),
+                            ),
+                          ),
+                          SizedBox(height: themeSizes.spacingMedium),
+                          TextField(
+                            obscureText: _hidePassword,
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: theme.colorScheme.secondary,
+                              hintText: "Confirm your password here...",
+                              label: Text("Confirm Password"),
                               suffixIcon: IconButton(
                                 onPressed: () {
                                   setState(() {
@@ -95,14 +119,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           SizedBox(height: themeSizes.spacingMedium),
                           ElevatedButton(
                             onPressed: () {},
-                            child: Text("Login"),
+                            child: Text("Create Account"),
                           ),
-                          SizedBox(height: themeSizes.spacingSmaller),
-                          TextButton(
-                            onPressed: () {},
-                            child: Text("Forgot password?"),
-                          ),
-                          SizedBox(height: themeSizes.spacingSmaller),
+                          SizedBox(height: themeSizes.spacingMedium),
                           Center(
                             child: SizedBox(
                               width: themeSizes.buttonMedium,
@@ -114,26 +133,21 @@ class _LoginScreenState extends State<LoginScreen> {
                                   color: theme.colorScheme.background,
                                   size: themeSizes.iconLarger,
                                 ),
-                                // icon: Image(
-                                //   image:
-                                //       AssetImage("assets/images/google-logo.png"),
-                                // ),
                               ),
                             ),
                           ),
-                          SizedBox(height: themeSizes.spacingSmaller),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                "Don't have an account yet?",
+                                "Already a member?",
                                 style: TextStyle(
                                   color: theme.colorScheme.background,
                                 ),
                               ),
                               TextButton(
                                 onPressed: () {},
-                                child: Text("Register"),
+                                child: Text("Login"),
                               ),
                             ],
                           )
