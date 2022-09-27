@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:messaging_app/modules/auth/providers/auth_provider.dart';
 import 'package:messaging_app/modules/shared/themes/extensions/theme_sizes_extension.dart';
+import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -10,12 +12,14 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  late AuthProvider _authProvider;
   bool _hidePassword = true;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final themeSizes = theme.extension<ThemeSizesExtension>()!; // is not null
+    _authProvider = Provider.of(context);
 
     return Scaffold(
       backgroundColor: theme.colorScheme.primary,
@@ -132,7 +136,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                               ),
                               TextButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  _authProvider.setRegisterPageActive();
+                                },
                                 child: Text("Register"),
                               ),
                             ],

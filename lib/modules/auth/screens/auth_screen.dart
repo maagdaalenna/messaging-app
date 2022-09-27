@@ -18,6 +18,8 @@ class _AuthScreenState extends State<AuthScreen> {
   Widget build(BuildContext context) {
     _authProvider = Provider.of(context);
 
-    return LoginScreen();
+    return _authProvider.activeAuthPage == ActiveAuthPage.login
+        ? LoginScreen()
+        : RegisterScreen();
   }
 }
