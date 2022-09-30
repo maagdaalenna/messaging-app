@@ -120,6 +120,14 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           SizedBox(height: themeSizes.spacingMedium),
                           ElevatedButton(
+                            style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all(
+                                theme.colorScheme.background,
+                              ),
+                              foregroundColor: MaterialStateProperty.all(
+                                theme.colorScheme.onBackground,
+                              ),
+                            ),
                             onPressed: () {
                               if (_formKey.currentState!.validate()) {
                                 LoginCredentials credentials = LoginCredentials(
@@ -151,26 +159,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             onPressed: () {},
                             child: Text("Forgot password?"),
                           ),
-                          SizedBox(height: themeSizes.spacingSmaller),
-                          Center(
-                            child: SizedBox(
-                              width: themeSizes.buttonMedium,
-                              height: themeSizes.buttonMedium,
-                              child: IconButton(
-                                onPressed: () {},
-                                icon: FaIcon(
-                                  FontAwesomeIcons.google,
-                                  color: theme.colorScheme.background,
-                                  size: themeSizes.iconLarger,
-                                ),
-                                // icon: Image(
-                                //   image:
-                                //       AssetImage("assets/images/google-logo.png"),
-                                // ),
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: themeSizes.spacingSmaller),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [

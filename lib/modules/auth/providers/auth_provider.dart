@@ -1,11 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
 import 'package:messaging_app/modules/auth/model/login_credentials.dart';
 import 'package:messaging_app/modules/auth/model/register_credentials.dart';
 
 class AuthProvider extends ChangeNotifier {
-  final FirebaseAuth _auth = GetIt.instance.get();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   bool loading = false;
   String? error = null;
 

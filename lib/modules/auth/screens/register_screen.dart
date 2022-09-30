@@ -160,6 +160,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                           SizedBox(height: themeSizes.spacingMedium),
                           ElevatedButton(
+                            style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all(
+                                theme.colorScheme.background,
+                              ),
+                              foregroundColor: MaterialStateProperty.all(
+                                theme.colorScheme.onBackground,
+                              ),
+                            ),
                             onPressed: () {
                               if (_formKey.currentState!.validate()) {
                                 RegisterCredentials credentials =
@@ -189,21 +197,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 ),
                               ),
                             ),
-                          SizedBox(height: themeSizes.spacingMedium),
-                          Center(
-                            child: SizedBox(
-                              width: themeSizes.buttonMedium,
-                              height: themeSizes.buttonMedium,
-                              child: IconButton(
-                                onPressed: () {},
-                                icon: FaIcon(
-                                  FontAwesomeIcons.google,
-                                  color: theme.colorScheme.background,
-                                  size: themeSizes.iconLarger,
-                                ),
-                              ),
-                            ),
-                          ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [

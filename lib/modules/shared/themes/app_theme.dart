@@ -75,10 +75,10 @@ class AppTheme {
               ),
             ),
             backgroundColor: MaterialStateProperty.all(
-              colorScheme.background,
+              colorScheme.primary,
             ),
             foregroundColor: MaterialStateProperty.all(
-              colorScheme.onBackground,
+              colorScheme.onPrimary,
             ),
             minimumSize: MaterialStateProperty.all(
               Size.fromHeight(
