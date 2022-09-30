@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:messaging_app/modules/auth/providers/auth_navigation_provider.dart';
 import 'package:messaging_app/modules/auth/providers/auth_provider.dart';
 import 'package:messaging_app/modules/auth/screens/auth_screen.dart';
+import 'package:messaging_app/modules/main/main_screen.dart';
 import 'package:messaging_app/modules/shared/themes/app_theme.dart';
 import 'package:provider/provider.dart';
 
@@ -17,8 +19,13 @@ class _MessagingAppState extends State<MessagingApp> {
       home: MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (context) => AuthProvider()),
+          ChangeNotifierProvider(create: (context) => AuthNavigationProvider()),
         ],
-        child: AuthScreen(),
+        child: Consumer<AuthProvider>(
+          builder: (context, authProvider, _) {
+            return authProvider.authenticated ? MainScreen() : AuthScreen();
+          },
+        ),
       ),
       theme: AppTheme.themeData,
     );

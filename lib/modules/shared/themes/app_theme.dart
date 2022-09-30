@@ -9,7 +9,7 @@ class AppTheme {
         onPrimary: const Color(0xffffffff),
         secondary: const Color(0xff2d6162),
         onSecondary: const Color(0x9affffff),
-        error: const Color(0xffd32f2f),
+        error: const Color(0xffbf360c),
         onError: const Color(0xffffffff),
         errorContainer: const Color(0xffff948c),
         onErrorContainer: const Color(0xffffffff),

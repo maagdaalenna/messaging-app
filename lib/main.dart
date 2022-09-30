@@ -10,7 +10,9 @@ Future<void> main() async {
   await Firebase.initializeApp();
 
   // get_it package for registering singletons
-  GetIt.I.registerLazySingleton(() => FirebaseAuth.instance);
+  GetIt.instance.registerLazySingleton(() {
+    return FirebaseAuth.instance;
+  });
 
   runApp(MessagingApp());
 }
