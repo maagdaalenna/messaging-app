@@ -3,6 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:messaging_app/modules/auth/model/register_credentials.dart';
 import 'package:messaging_app/modules/auth/providers/auth_navigation_provider.dart';
 import 'package:messaging_app/modules/auth/providers/auth_provider.dart';
+import 'package:messaging_app/modules/auth/providers/email_provider.dart';
 import 'package:messaging_app/modules/shared/themes/extensions/theme_sizes_extension.dart';
 import 'package:provider/provider.dart';
 
@@ -16,6 +17,7 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   late AuthProvider _authProvider;
   late AuthNavigationProvider _authNavigationProvider;
+  late EmailProvider _emailProvider;
   bool _hidePassword = true;
   final _formKey = GlobalKey<FormState>();
   final _displayNameController = TextEditingController();
@@ -29,6 +31,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final themeSizes = theme.extension<ThemeSizesExtension>()!;
     _authProvider = Provider.of(context);
     _authNavigationProvider = Provider.of(context, listen: false);
+    _emailProvider = Provider.of(context);
 
     return Scaffold(
       backgroundColor: theme.colorScheme.primary,

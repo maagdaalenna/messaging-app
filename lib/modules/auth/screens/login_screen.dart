@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:messaging_app/modules/auth/model/login_credentials.dart';
 import 'package:messaging_app/modules/auth/providers/auth_navigation_provider.dart';
 import 'package:messaging_app/modules/auth/providers/auth_provider.dart';
+import 'package:messaging_app/modules/auth/providers/email_provider.dart';
 import 'package:messaging_app/modules/shared/themes/extensions/theme_sizes_extension.dart';
 import 'package:provider/provider.dart';
 
@@ -16,10 +19,38 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   late AuthProvider _authProvider;
   late AuthNavigationProvider _authNavigationProvider;
+  late EmailProvider _emailProvider;
   bool _hidePassword = true;
   final _formKey = GlobalKey<FormState>();
   final _emailAdressController = TextEditingController();
   final _passwordController = TextEditingController();
+
+  late Timer _resendCooldownTimer;
+  int _resendCooldown = 0;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  void _startTimer() {
+    setState(() {
+      _resendCooldown = 10;
+    });
+    _resendCooldownTimer = Timer.periodic(
+      Duration(seconds: 1),
+      (timer) {
+        if (mounted) {
+          setState(() {
+            _resendCooldown--;
+          });
+          if (_resendCooldown == 0) {
+            _resendCooldownTimer.cancel();
+          }
+        }
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final themeSizes = theme.extension<ThemeSizesExtension>()!; // is not null
     _authProvider = Provider.of(context);
     _authNavigationProvider = Provider.of(context, listen: false);
+    _emailProvider = Provider.of(context);
 
     return Scaffold(
       backgroundColor: theme.colorScheme.primary,
@@ -155,10 +187,20 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                           SizedBox(height: themeSizes.spacingSmaller),
-                          TextButton(
-                            onPressed: () {},
-                            child: Text("Forgot password?"),
-                          ),
+                          _resendCooldown != 0
+                              ? TextButton(
+                                  onPressed: null,
+                                  child: Text(
+                                      "Forgot password? (${_resendCooldown})"),
+                                )
+                              : TextButton(
+                                  onPressed: () {
+                                    _emailProvider.sendPasswordResetEmail(
+                                        _emailAdressController.text);
+                                    _startTimer();
+                                  },
+                                  child: Text("Forgot password?"),
+                                ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -195,6 +237,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void dispose() {
     _emailAdressController.dispose();
     _passwordController.dispose();
+    _resendCooldownTimer.cancel();
     super.dispose();
   }
 }

@@ -19,15 +19,33 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     final theme = Theme.of(context);
     final themeSizes = theme.extension<ThemeSizesExtension>()!; // is not null
 
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: ElevatedButton(
-        child: _authProvider.loading
-            ? CircularProgressIndicator()
-            : Text("Log Out"),
-        onPressed: () {
-          _authProvider.logout();
-        },
+    return Scaffold(
+      backgroundColor: theme.colorScheme.background,
+      appBar: AppBar(
+        leading: Padding(
+          padding: EdgeInsets.only(left: themeSizes.spacingLarge),
+          child: Icon(Icons.person),
+        ),
+        backgroundColor: theme.colorScheme.primary,
+        title: Text(
+          "My profile",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            ElevatedButton(
+              child: _authProvider.loading
+                  ? CircularProgressIndicator()
+                  : Text("Log Out"),
+              onPressed: () {
+                _authProvider.logout();
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

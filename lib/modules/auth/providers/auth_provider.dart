@@ -16,7 +16,35 @@ class AuthProvider extends ChangeNotifier {
     return _auth.currentUser == null ? false : true;
   }
 
+  bool? get confirmed {
+    return authenticated ? user!.emailVerified : null;
+  }
+
+  Future<void> reload() async {
+    if (loading == true) return;
+    error = null;
+    loading = true;
+    notifyListeners();
+
+    if (_auth.currentUser == null) {
+      error = "No user is signed in!";
+      loading = false;
+      notifyListeners();
+      return;
+    }
+    try {
+      await _auth.currentUser!.reload();
+      loading = false;
+      notifyListeners();
+    } on FirebaseAuthException catch (e) {
+      error = e.message;
+      loading = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> register(RegisterCredentials credentials) async {
+    if (loading == true) return;
     error = null;
     loading = true;
     notifyListeners();
@@ -38,6 +66,7 @@ class AuthProvider extends ChangeNotifier {
         password: credentials.password,
       );
       await _auth.currentUser!.updateDisplayName(credentials.displayName);
+      await _auth.currentUser!.sendEmailVerification();
       loading = false;
       notifyListeners();
     } on FirebaseAuthException catch (e) {
@@ -48,9 +77,11 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> login(LoginCredentials credentials) async {
+    if (loading == true) return;
     error = null;
     loading = true;
     notifyListeners();
+
     try {
       await _auth.signInWithEmailAndPassword(
         email: credentials.email,
@@ -66,9 +97,11 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> logout() async {
+    if (loading == true) return;
     error = null;
     loading = true;
     notifyListeners();
+
     try {
       await _auth.signOut();
       loading = false;

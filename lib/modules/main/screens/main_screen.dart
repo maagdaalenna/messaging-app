@@ -14,26 +14,9 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   var _selectedIndex = 1;
 
-  final List<String> _titles = [
-    "Private chats",
-    "Family chats",
-    "My profile",
-  ];
-
-  final List<IconData> _icons = [
-    Icons.chat,
-    Icons.family_restroom,
-    Icons.person,
-  ];
-
-  final List<Widget> _pages = [
-    PrivateChatsScreen(),
-    FamilyChatsScreen(),
-    MyProfileScreen(),
-  ];
-
   void _onNavigationItemTap(int index) {
     setState(() {
+      // re-build the widget to display the new selected page
       _selectedIndex = index;
     });
   }
@@ -41,23 +24,20 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final themeSizes = theme.extension<ThemeSizesExtension>()!; // is not null
+    final themeSizes =
+        theme.extension<ThemeSizesExtension>()!; // we surely know is not null
 
     return Container(
       child: Scaffold(
         backgroundColor: theme.colorScheme.background,
-        appBar: AppBar(
-          leading: Padding(
-            padding: EdgeInsets.only(left: themeSizes.spacingLarge),
-            child: Icon(_icons[_selectedIndex]),
-          ),
-          backgroundColor: theme.colorScheme.primary,
-          title: Text(
-            _titles[_selectedIndex],
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
+        body: IndexedStack(
+          index: _selectedIndex,
+          children: [
+            PrivateChatsScreen(),
+            FamilyChatsScreen(),
+            MyProfileScreen(),
+          ],
         ),
-        body: _pages[_selectedIndex],
         bottomNavigationBar: BottomNavigationBar(
           backgroundColor: theme.colorScheme.primary,
           selectedItemColor: theme.colorScheme.background,
