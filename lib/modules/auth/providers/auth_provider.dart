@@ -1,10 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:messaging_app/modules/auth/model/login_credentials.dart';
 import 'package:messaging_app/modules/auth/model/register_credentials.dart';
+import 'package:messaging_app/modules/shared/model/firestore_user.dart';
 
 class AuthProvider extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   bool loading = false;
   String? error = null;
 
@@ -66,10 +69,19 @@ class AuthProvider extends ChangeNotifier {
         password: credentials.password,
       );
       await _auth.currentUser!.updateDisplayName(credentials.displayName);
+      FirestoreUser userToUpload = FirestoreUser(
+        id: _auth.currentUser!.uid,
+        displayName: _auth.currentUser!.displayName!,
+        email: _auth.currentUser!.email!,
+      );
+      await _firestore
+          .collection("users")
+          .doc(userToUpload.id)
+          .set(userToUpload.toJson()); // upload to firestore
       await _auth.currentUser!.sendEmailVerification();
       loading = false;
       notifyListeners();
-    } on FirebaseAuthException catch (e) {
+    } on FirebaseException catch (e) {
       error = e.message;
       loading = false;
       notifyListeners();
@@ -89,7 +101,7 @@ class AuthProvider extends ChangeNotifier {
       );
       loading = false;
       notifyListeners();
-    } on FirebaseAuthException catch (e) {
+    } on FirebaseException catch (e) {
       error = e.message;
       loading = false;
       notifyListeners();
@@ -106,7 +118,7 @@ class AuthProvider extends ChangeNotifier {
       await _auth.signOut();
       loading = false;
       notifyListeners();
-    } on FirebaseAuthException catch (e) {
+    } on FirebaseException catch (e) {
       error = e.message;
       loading = false;
       notifyListeners();

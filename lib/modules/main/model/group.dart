@@ -1,22 +1,18 @@
-import 'package:messaging_app/modules/main/model/message.dart';
-import 'package:messaging_app/modules/shared/model/user.dart';
-
 class Group {
+  final String? id;
   final String name;
-  final List<User> members;
-  final List<Message> messages;
 
   Group({
+    this.id,
     required this.name,
-    required this.members,
-    required this.messages,
   });
 
-  // Group.fromJson(Map<String, dynamic> json) {
-  //   return Group(name: json["name"], );
-  // }
+  static Group fromJson(Map<String, dynamic> json) {
+    return Group(
+      name: json["name"],
+    );
+  }
 }
-
 
 
 // {

@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'package:messaging_app/modules/main/model/group.dart';
+import 'package:messaging_app/modules/main/providers/group_chat_provider.dart';
+import 'package:messaging_app/modules/main/providers/groups_provider.dart';
+import 'package:messaging_app/modules/main/screens/chat_screen.dart';
 import 'package:messaging_app/modules/shared/themes/extensions/theme_sizes_extension.dart';
+import 'package:provider/provider.dart';
 
 class FamilyChatsScreen extends StatefulWidget {
   const FamilyChatsScreen({Key? key}) : super(key: key);
@@ -10,16 +15,15 @@ class FamilyChatsScreen extends StatefulWidget {
 }
 
 class _FamilyChatsScreenState extends State<FamilyChatsScreen> {
-  final List<String> _cards = [
-    for (var i = 1; i <= 50; i++) "Family $i",
-  ];
+  late GroupsProvider _groupsProvider;
+  late GroupChatProvider _groupChatProvider;
 
   // 20 items per page
   static const _pageSize = 20;
 
   // we need a controller for the infinite list view
-  final PagingController<int, String> _pagingController =
-      PagingController(firstPageKey: 0);
+  final PagingController<Group?, Group> _pagingController =
+      PagingController(firstPageKey: null);
 
   @override
   void initState() {
@@ -29,22 +33,15 @@ class _FamilyChatsScreenState extends State<FamilyChatsScreen> {
     super.initState();
   }
 
-  Future<List<String>> getTextList(pageKey, pageSize) async {
-    await new Future.delayed(const Duration(seconds: 1));
-    if (pageKey + pageSize <= _cards.length)
-      return _cards.getRange(pageKey, pageKey + pageSize).toList();
-    else
-      return _cards.getRange(pageKey, _cards.length).toList();
-  }
-
-  Future<void> _fetchPage(int pageKey) async {
+  Future<void> _fetchPage(Group? pageKey) async {
     try {
-      final newItems = await getTextList(pageKey, _pageSize);
+      final newItems =
+          await _groupsProvider.getGroupsForCurrentUser(pageKey, _pageSize);
       final isLastPage = newItems.length < _pageSize;
       if (isLastPage) {
         _pagingController.appendLastPage(newItems);
       } else {
-        final nextPageKey = pageKey + newItems.length;
+        final nextPageKey = newItems[-1];
         _pagingController.appendPage(newItems, nextPageKey);
       }
     } catch (error) {
@@ -56,6 +53,8 @@ class _FamilyChatsScreenState extends State<FamilyChatsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final themeSizes = theme.extension<ThemeSizesExtension>()!;
+    _groupsProvider = Provider.of(context);
+    _groupChatProvider = Provider.of(context);
 
     return Scaffold(
       backgroundColor: theme.colorScheme.background,
@@ -70,7 +69,9 @@ class _FamilyChatsScreenState extends State<FamilyChatsScreen> {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
-      body: _cards.isEmpty
+      body: (_pagingController.itemList == null
+              ? false
+              : _pagingController.itemList!.isEmpty)
           ? Padding(
               padding: EdgeInsets.all(themeSizes.spacingLarge),
               child: Center(
@@ -84,17 +85,24 @@ class _FamilyChatsScreenState extends State<FamilyChatsScreen> {
                 ),
               ),
             )
-          : PagedListView<int, String>(
+          : PagedListView<Group?, Group>(
               pagingController: _pagingController,
-              builderDelegate: PagedChildBuilderDelegate<String>(
-                itemBuilder: (context, item, index) => ListTile(
+              builderDelegate: PagedChildBuilderDelegate<Group>(
+                itemBuilder: (context, group, index) => ListTile(
                   contentPadding: EdgeInsets.only(
                     left: themeSizes.spacingMedium,
                     right: themeSizes.spacingMedium,
                   ),
-                  onTap: () {},
+                  onTap: () {
+                    _groupChatProvider.currentGroup = group;
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const ChatScreen(),
+                      ),
+                    );
+                  },
                   leading: CircleAvatar(radius: 24),
-                  title: Text(item),
+                  title: Text(group.name),
                   subtitle: Text(
                     "Hello!",
                     style: TextStyle(color: theme.colorScheme.onSecondary),
@@ -103,6 +111,7 @@ class _FamilyChatsScreenState extends State<FamilyChatsScreen> {
               ),
             ),
       floatingActionButton: FloatingActionButton(
+        heroTag: null, // solves the heroes error
         onPressed: () {},
         backgroundColor: theme.colorScheme.primary,
         foregroundColor: theme.colorScheme.onPrimary,
@@ -122,3 +131,15 @@ class _FamilyChatsScreenState extends State<FamilyChatsScreen> {
     super.dispose();
   }
 }
+
+/*
+
+bool condition = _pagingController.itemList? == null ? false : _pagingController.itemList!.isEmpty
+
+if (condition) {
+
+} else {
+
+}
+
+*/

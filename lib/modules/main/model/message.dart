@@ -1,9 +1,9 @@
-import 'package:messaging_app/modules/shared/model/user.dart';
+import 'package:messaging_app/modules/shared/model/firestore_user.dart';
 
 class Message {
   String body;
-  User from;
-  User? to;
+  FirestoreUser from;
+  FirestoreUser? to;
 
   Message({
     required this.body,

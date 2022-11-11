@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:messaging_app/modules/main/providers/group_chat_provider.dart';
+import 'package:messaging_app/modules/main/providers/groups_provider.dart';
 import 'package:messaging_app/modules/main/screens/family_chats_screen.dart';
 import 'package:messaging_app/modules/main/screens/my_profile_screen.dart';
 import 'package:messaging_app/modules/main/screens/private_chats_screen.dart';
 import 'package:messaging_app/modules/shared/themes/extensions/theme_sizes_extension.dart';
+import 'package:provider/provider.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);

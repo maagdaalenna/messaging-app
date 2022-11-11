@@ -12,15 +12,10 @@ class EmailProvider extends ChangeNotifier {
     error = null;
     loading = true;
     notifyListeners();
-    try {
-      await _auth.currentUser!.sendEmailVerification();
-      loading = false;
-      notifyListeners();
-    } on FirebaseAuthException catch (e) {
-      error = e.message;
-      loading = false;
-      notifyListeners();
-    }
+
+    await _auth.currentUser!.sendEmailVerification();
+    loading = false;
+    notifyListeners();
   }
 
   Future<void> sendPasswordResetEmail(String email) async {
@@ -32,7 +27,7 @@ class EmailProvider extends ChangeNotifier {
       await _auth.sendPasswordResetEmail(email: email);
       loading = false;
       notifyListeners();
-    } on FirebaseAuthException catch (e) {
+    } on FirebaseException catch (e) {
       error = e.message;
       loading = false;
       notifyListeners();

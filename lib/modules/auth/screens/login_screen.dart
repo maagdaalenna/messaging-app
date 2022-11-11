@@ -31,6 +31,11 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
+    _resendCooldownTimer = Timer.periodic(
+      Duration(seconds: 1),
+      (timer) {},
+    );
+    _resendCooldownTimer.cancel();
   }
 
   void _startTimer() {

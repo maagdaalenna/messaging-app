@@ -9,6 +9,8 @@ class AppTheme {
         onPrimary: const Color(0xffffffff),
         secondary: const Color(0xff2d6162),
         onSecondary: const Color(0x9affffff),
+        tertiary: const Color(0xff262d34),
+        onTertiary: const Color(0xff95a1ac),
         error: const Color(0xffbf360c),
         onError: const Color(0xffffffff),
         errorContainer: const Color(0xffff948c),
