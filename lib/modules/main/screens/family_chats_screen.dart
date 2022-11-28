@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
-import 'package:messaging_app/modules/main/model/group.dart';
+import 'package:messaging_app/modules/main/classes/group.dart';
 import 'package:messaging_app/modules/main/providers/group_chat_provider.dart';
 import 'package:messaging_app/modules/main/providers/groups_provider.dart';
 import 'package:messaging_app/modules/main/screens/chat_screen.dart';

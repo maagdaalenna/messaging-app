@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:messaging_app/modules/auth/model/register_credentials.dart';
+import 'package:messaging_app/modules/auth/classes/register_credentials.dart';
 import 'package:messaging_app/modules/auth/providers/auth_navigation_provider.dart';
 import 'package:messaging_app/modules/auth/providers/auth_provider.dart';
 import 'package:messaging_app/modules/shared/themes/extensions/theme_sizes_extension.dart';

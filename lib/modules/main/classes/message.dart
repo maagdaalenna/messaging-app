@@ -1,4 +1,4 @@
-import 'package:messaging_app/modules/shared/model/firestore_user.dart';
+import 'package:messaging_app/modules/shared/classes/firestore_user.dart';
 
 class Message {
   String body;

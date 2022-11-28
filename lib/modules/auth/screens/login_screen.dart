@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:messaging_app/modules/auth/model/login_credentials.dart';
+import 'package:messaging_app/modules/auth/classes/login_credentials.dart';
 import 'package:messaging_app/modules/auth/providers/auth_navigation_provider.dart';
 import 'package:messaging_app/modules/auth/providers/auth_provider.dart';
 import 'package:messaging_app/modules/auth/providers/email_provider.dart';
