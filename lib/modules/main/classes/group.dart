@@ -9,6 +9,7 @@ class Group {
 
   static Group fromJson(Map<String, dynamic> json) {
     return Group(
+      id: json["id"],
       name: json["name"],
     );
   }

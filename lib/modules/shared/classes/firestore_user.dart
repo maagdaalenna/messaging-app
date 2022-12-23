@@ -9,6 +9,14 @@ class FirestoreUser {
     required this.email,
   });
 
+  static FirestoreUser fromJson(Map<String, dynamic> json) {
+    return FirestoreUser(
+      id: json["id"],
+      displayName: json["displayName"],
+      email: json["email"],
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       "displayName": this.displayName,

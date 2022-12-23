@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:messaging_app/modules/main/classes/group.dart';
+import 'package:messaging_app/modules/main/classes/group_item.dart';
 import 'package:messaging_app/modules/main/providers/group_chat_provider.dart';
 import 'package:messaging_app/modules/main/providers/groups_provider.dart';
 import 'package:messaging_app/modules/main/screens/chat_screen.dart';
@@ -22,7 +23,7 @@ class _FamilyChatsScreenState extends State<FamilyChatsScreen> {
   static const _pageSize = 20;
 
   // we need a controller for the infinite list view
-  final PagingController<Group?, Group> _pagingController =
+  final PagingController<Group?, GroupItem> _pagingController =
       PagingController(firstPageKey: null);
 
   @override
@@ -35,14 +36,27 @@ class _FamilyChatsScreenState extends State<FamilyChatsScreen> {
 
   Future<void> _fetchPage(Group? pageKey) async {
     try {
-      final newItems =
-          await _groupsProvider.getGroupsForCurrentUser(pageKey, _pageSize);
-      final isLastPage = newItems.length < _pageSize;
+      final newGroups = await _groupsProvider.getGroupsForCurrentUser(
+        pageKey,
+        _pageSize,
+      );
+
+      List<GroupItem> newGroupItems = [];
+
+      for (Group group in newGroups) {
+        var lastMessage = await _groupsProvider.getLastMessage(group.id!);
+        newGroupItems.add(GroupItem(
+          group: group,
+          from: lastMessage.from.displayName,
+          lastMessage: lastMessage.body,
+        ));
+      }
+      final isLastPage = newGroups.length < _pageSize;
       if (isLastPage) {
-        _pagingController.appendLastPage(newItems);
+        _pagingController.appendLastPage(newGroupItems);
       } else {
-        final nextPageKey = newItems[-1];
-        _pagingController.appendPage(newItems, nextPageKey);
+        final nextPageKey = newGroups[-1];
+        _pagingController.appendPage(newGroupItems, nextPageKey);
       }
     } catch (error) {
       _pagingController.error = error;
@@ -85,16 +99,16 @@ class _FamilyChatsScreenState extends State<FamilyChatsScreen> {
                 ),
               ),
             )
-          : PagedListView<Group?, Group>(
+          : PagedListView<Group?, GroupItem>(
               pagingController: _pagingController,
-              builderDelegate: PagedChildBuilderDelegate<Group>(
-                itemBuilder: (context, group, index) => ListTile(
+              builderDelegate: PagedChildBuilderDelegate<GroupItem>(
+                itemBuilder: (context, groupItem, index) => ListTile(
                   contentPadding: EdgeInsets.only(
                     left: themeSizes.spacingMedium,
                     right: themeSizes.spacingMedium,
                   ),
                   onTap: () {
-                    _groupChatProvider.currentGroup = group;
+                    _groupChatProvider.currentGroup = groupItem.group;
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) => const ChatScreen(),
@@ -102,9 +116,9 @@ class _FamilyChatsScreenState extends State<FamilyChatsScreen> {
                     );
                   },
                   leading: CircleAvatar(radius: 24),
-                  title: Text(group.name),
+                  title: Text(groupItem.group.name),
                   subtitle: Text(
-                    "Hello!",
+                    groupItem.showUserAndMessage(),
                     style: TextStyle(color: theme.colorScheme.onSecondary),
                   ),
                 ),

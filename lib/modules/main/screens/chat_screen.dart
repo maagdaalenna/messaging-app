@@ -38,12 +38,15 @@ class _ChatScreenState extends State<ChatScreen> {
               onPressed: () {},
               icon: Icon(Icons.call),
             ),
-          )
+          ),
         ],
         backgroundColor: theme.colorScheme.primary,
-        title: Text(
-          _groupChatProvider.currentGroup!.name,
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: TextButton(
+          onPressed: () {},
+          child: Text(
+            _groupChatProvider.currentGroup!.name,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
         ),
       ),
       body: Padding(
@@ -61,6 +64,10 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
               child: Row(
                 children: [
+                  IconButton(
+                    onPressed: () {},
+                    icon: Icon(Icons.camera_alt_sharp),
+                  ),
                   Expanded(
                     child: TextField(
                       decoration: InputDecoration(
@@ -70,6 +77,10 @@ class _ChatScreenState extends State<ChatScreen> {
                           color: theme.colorScheme.onTertiary,
                         ),
                         label: Text("Message"),
+                        suffixIcon: IconButton(
+                          onPressed: () {},
+                          icon: Icon(Icons.attach_file),
+                        ),
                       ),
                     ),
                   ),
