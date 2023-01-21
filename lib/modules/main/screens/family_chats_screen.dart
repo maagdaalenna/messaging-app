@@ -47,7 +47,7 @@ class _FamilyChatsScreenState extends State<FamilyChatsScreen> {
         var lastMessage = await _groupsProvider.getLastMessage(group.id!);
         newGroupItems.add(GroupItem(
           group: group,
-          from: lastMessage.from.displayName,
+          lastFrom: lastMessage.from.displayName,
           lastMessage: lastMessage.body,
         ));
       }
@@ -119,7 +119,10 @@ class _FamilyChatsScreenState extends State<FamilyChatsScreen> {
                   title: Text(groupItem.group.name),
                   subtitle: Text(
                     groupItem.showUserAndMessage(),
-                    style: TextStyle(color: theme.colorScheme.onSecondary),
+                    style: TextStyle(
+                      color: theme.colorScheme.onSecondary,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ),
               ),

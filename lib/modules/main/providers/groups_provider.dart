@@ -62,7 +62,11 @@ class GroupsProvider extends ChangeNotifier {
         .orderBy("datetime", descending: true)
         .limit(1)
         .get()
-        .then((snapshot) => snapshot.docs[0].data());
+        .then((snapshot) {
+      var data = snapshot.docs[0].data();
+      data["id"] = snapshot.docs[0].id;
+      return data;
+    });
     json["datetime"] =
         DateTime.parse((json["datetime"] as Timestamp).toDate().toString());
 
