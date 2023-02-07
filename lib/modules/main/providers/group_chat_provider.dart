@@ -1,24 +1,93 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:messaging_app/modules/main/classes/group.dart';
-import 'package:messaging_app/modules/main/classes/message.dart';
+import 'package:messaging_app/modules/main/classes/group_message.dart';
+import 'package:messaging_app/modules/main/classes/message_item.dart';
 import 'package:messaging_app/modules/shared/classes/firestore_user.dart';
 
 class GroupChatProvider extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  // bool loading = false;
-  // String? error = null;
-  Group? currentGroup;
-  var currentUser = FirebaseAuth.instance.currentUser!;
 
-  Future<List<Message>> getMessagesForCurrentGroup(
-    Message? lastMessage,
+  // 20 items per page
+  static const _pageSize = 15;
+
+  // we need a controller for the infinite list view
+  final PagingController<GroupMessage?, MessageItem> _pagingController =
+      PagingController(firstPageKey: null);
+
+  bool loading = false;
+  String? error = null;
+  Group? _currentGroup;
+
+  FirestoreUser get currentUser {
+    return FirestoreUser.fromUser(_auth.currentUser!);
+  }
+
+  Group? get currentGroup {
+    return _currentGroup;
+  }
+
+  PagingController<GroupMessage?, MessageItem> get pagingController {
+    return _pagingController;
+  }
+
+  Future<void> _fetchPage(GroupMessage? pageKey) async {
+    try {
+      final newMessages = await getMessagesForCurrentGroup(
+        pageKey,
+        _pageSize,
+      );
+
+      List<MessageItem> newMessageItems = [];
+
+      for (GroupMessage message in newMessages) {
+        newMessageItems.add(MessageItem(
+          body: message.body,
+          from: (currentUser.id != message.from.id)
+              ? message.from.displayName
+              : "You",
+          time: message.datetime.hour.toString() +
+              ":" +
+              message.datetime.minute.toString(),
+        ));
+      }
+      final isLastPage = newMessages.length < _pageSize;
+      if (isLastPage) {
+        _pagingController.appendLastPage(newMessageItems);
+      } else {
+        final nextPageKey = newMessages.last;
+        _pagingController.appendPage(newMessageItems, nextPageKey);
+      }
+    } catch (error) {
+      _pagingController.error = error;
+    }
+  }
+
+  void initialise(Group currentGroup) {
+    this._currentGroup = currentGroup;
+    String gid = _currentGroup!.id!;
+    _pagingController.addPageRequestListener((pageKey) {
+      _fetchPage(pageKey);
+    });
+    _firestore
+        .collection("groups")
+        .doc(gid)
+        .collection("messages")
+        .snapshots()
+        .listen((event) {
+      event.docChanges.forEach((element) {});
+    });
+  }
+
+  Future<List<GroupMessage>> getMessagesForCurrentGroup(
+    GroupMessage? lastMessage,
     int pageSize,
   ) async {
     // await new Future.delayed(const Duration(seconds: 2));
-    String gid = currentGroup!.id!;
+    String gid = _currentGroup!.id!;
     List<Map<String, dynamic>> jsons;
 
     var query = _firestore
@@ -54,7 +123,7 @@ class GroupChatProvider extends ChangeNotifier {
       });
     } else {
       jsons = await query
-          .startAfter([lastMessage.id])
+          .startAfter([lastMessage.datetime])
           .limit(pageSize)
           .get()
           .then((snapshot) async {
@@ -84,12 +153,36 @@ class GroupChatProvider extends ChangeNotifier {
           });
     }
 
-    List<Message> messages = [];
+    List<GroupMessage> messages = [];
     for (var json in jsons) {
-      var message = Message.fromJson(json);
+      var message = GroupMessage.fromJson(json);
       messages.add(message);
     }
 
     return messages;
+  }
+
+  Future<void> addMessageForCurrentGroup(
+    GroupMessage groupMessage,
+  ) async {
+    String gid = _currentGroup!.id!;
+    if (loading == true) return;
+    error = null;
+    loading = true;
+    notifyListeners();
+
+    try {
+      await _firestore
+          .collection("groups")
+          .doc(gid)
+          .collection("messages")
+          .add(groupMessage.toJson());
+      loading = false;
+      notifyListeners();
+    } on FirebaseException catch (e) {
+      error = e.message;
+      loading = false;
+      notifyListeners();
+    }
   }
 }

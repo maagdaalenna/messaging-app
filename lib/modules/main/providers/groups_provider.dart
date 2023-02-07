@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:messaging_app/modules/main/classes/group.dart';
-import 'package:messaging_app/modules/main/classes/message.dart';
+import 'package:messaging_app/modules/main/classes/group_message.dart';
 import 'package:messaging_app/modules/shared/classes/firestore_user.dart';
 
 class GroupsProvider extends ChangeNotifier {
@@ -53,7 +53,7 @@ class GroupsProvider extends ChangeNotifier {
     return groups;
   }
 
-  Future<Message> getLastMessage(String id) async {
+  Future<GroupMessage> getLastMessage(String id) async {
     // Get the message
     var json = await _firestore
         .collection("groups")
@@ -87,6 +87,6 @@ class GroupsProvider extends ChangeNotifier {
         : FirestoreUser(id: "", displayName: "Unknown", email: "");
 
     // Return the Message object created from the json
-    return Message.fromJson(json);
+    return GroupMessage.fromJson(json);
   }
 }

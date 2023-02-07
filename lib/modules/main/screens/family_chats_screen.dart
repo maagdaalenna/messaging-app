@@ -55,7 +55,7 @@ class _FamilyChatsScreenState extends State<FamilyChatsScreen> {
       if (isLastPage) {
         _pagingController.appendLastPage(newGroupItems);
       } else {
-        final nextPageKey = newGroups[-1];
+        final nextPageKey = newGroups.last;
         _pagingController.appendPage(newGroupItems, nextPageKey);
       }
     } catch (error) {
@@ -108,7 +108,7 @@ class _FamilyChatsScreenState extends State<FamilyChatsScreen> {
                     right: themeSizes.spacingMedium,
                   ),
                   onTap: () {
-                    _groupChatProvider.currentGroup = groupItem.group;
+                    _groupChatProvider.initialise(groupItem.group);
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) => const ChatScreen(),

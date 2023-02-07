@@ -1,3 +1,5 @@
+import 'package:firebase_auth/firebase_auth.dart';
+
 class FirestoreUser {
   final String? id;
   final String displayName;
@@ -8,6 +10,14 @@ class FirestoreUser {
     required this.displayName,
     required this.email,
   });
+
+  static FirestoreUser fromUser(User user) {
+    return FirestoreUser(
+      id: user.uid,
+      displayName: user.displayName!,
+      email: user.email!,
+    );
+  }
 
   static FirestoreUser fromJson(Map<String, dynamic> json) {
     return FirestoreUser(

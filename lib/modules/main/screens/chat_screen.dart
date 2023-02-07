@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
-import 'package:messaging_app/modules/main/classes/message.dart';
+import 'package:messaging_app/modules/main/classes/group_message.dart';
 import 'package:messaging_app/modules/main/classes/message_item.dart';
 import 'package:messaging_app/modules/main/providers/group_chat_provider.dart';
 import 'package:messaging_app/modules/main/widgets/message_tile.dart';
@@ -16,53 +16,7 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   late GroupChatProvider _groupChatProvider;
-
-  // 20 items per page
-  static const _pageSize = 30;
-
-  // we need a controller for the infinite list view
-  final PagingController<Message?, MessageItem> _pagingController =
-      PagingController(firstPageKey: null);
-
-  @override
-  void initState() {
-    _pagingController.addPageRequestListener((pageKey) {
-      _fetchPage(pageKey);
-    });
-    super.initState();
-  }
-
-  Future<void> _fetchPage(Message? pageKey) async {
-    try {
-      final newMessages = await _groupChatProvider.getMessagesForCurrentGroup(
-        pageKey,
-        _pageSize,
-      );
-
-      List<MessageItem> newMessageItems = [];
-
-      for (Message message in newMessages) {
-        newMessageItems.add(MessageItem(
-          body: message.body,
-          from: (_groupChatProvider.currentUser.uid != message.from.id)
-              ? message.from.displayName
-              : "You",
-          time: message.datetime.hour.toString() +
-              ":" +
-              message.datetime.minute.toString(),
-        ));
-      }
-      final isLastPage = newMessages.length < _pageSize;
-      if (isLastPage) {
-        _pagingController.appendLastPage(newMessageItems);
-      } else {
-        final nextPageKey = newMessages[-1];
-        _pagingController.appendPage(newMessageItems, nextPageKey);
-      }
-    } catch (error) {
-      _pagingController.error = error;
-    }
-  }
+  final _messageController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -107,9 +61,9 @@ class _ChatScreenState extends State<ChatScreen> {
         child: Column(
           children: [
             Expanded(
-              child: (_pagingController.itemList == null
+              child: (_groupChatProvider.pagingController.itemList == null
                       ? false
-                      : _pagingController.itemList!.isEmpty)
+                      : _groupChatProvider.pagingController.itemList!.isEmpty)
                   ? Padding(
                       padding: EdgeInsets.all(themeSizes.spacingLarge),
                       child: Center(
@@ -123,8 +77,9 @@ class _ChatScreenState extends State<ChatScreen> {
                         ),
                       ),
                     )
-                  : PagedListView<Message?, MessageItem>(
-                      pagingController: _pagingController,
+                  : PagedListView<GroupMessage?, MessageItem>(
+                      reverse: true,
+                      pagingController: _groupChatProvider.pagingController,
                       builderDelegate: PagedChildBuilderDelegate<MessageItem>(
                         itemBuilder: (context, messageItem, index) =>
                             MessageTile(
@@ -146,6 +101,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                   Expanded(
                     child: TextField(
+                      controller: _messageController,
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: theme.colorScheme.tertiary,
@@ -164,7 +120,16 @@ class _ChatScreenState extends State<ChatScreen> {
                     width: themeSizes.spacingSmaller,
                   ),
                   IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      var groupMessage = GroupMessage(
+                        body: _messageController.text,
+                        from: _groupChatProvider.currentUser,
+                        datetime: DateTime.now(),
+                      );
+                      _groupChatProvider
+                          .addMessageForCurrentGroup(groupMessage);
+                      _messageController.clear();
+                    },
                     icon: Icon(Icons.send),
                   ),
                 ],
