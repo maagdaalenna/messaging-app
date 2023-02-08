@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:messaging_app/modules/auth/classes/login_credentials.dart';
-import 'package:messaging_app/modules/auth/classes/register_credentials.dart';
-import 'package:messaging_app/modules/shared/classes/firestore_user.dart';
+import 'package:Fam.ly/modules/auth/classes/login_credentials.dart';
+import 'package:Fam.ly/modules/auth/classes/register_credentials.dart';
+import 'package:Fam.ly/modules/shared/classes/firestore_user.dart';
 
 class AuthProvider extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;

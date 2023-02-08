@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
-import 'package:messaging_app/modules/main/classes/group.dart';
-import 'package:messaging_app/modules/main/classes/group_item.dart';
-import 'package:messaging_app/modules/main/providers/group_chat_provider.dart';
-import 'package:messaging_app/modules/main/providers/groups_provider.dart';
-import 'package:messaging_app/modules/main/screens/chat_screen.dart';
-import 'package:messaging_app/modules/shared/themes/extensions/theme_sizes_extension.dart';
+import 'package:Fam.ly/modules/main/classes/group.dart';
+import 'package:Fam.ly/modules/main/classes/group_item.dart';
+import 'package:Fam.ly/modules/main/providers/group_chat_provider.dart';
+import 'package:Fam.ly/modules/main/providers/groups_provider.dart';
+import 'package:Fam.ly/modules/main/screens/chat_screen.dart';
+import 'package:Fam.ly/modules/shared/themes/extensions/theme_sizes_extension.dart';
 import 'package:provider/provider.dart';
 
 class FamilyChatsScreen extends StatefulWidget {

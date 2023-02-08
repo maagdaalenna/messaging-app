@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:messaging_app/modules/main/classes/group.dart';
-import 'package:messaging_app/modules/main/classes/group_message.dart';
-import 'package:messaging_app/modules/shared/classes/firestore_user.dart';
+import 'package:Fam.ly/modules/main/classes/group.dart';
+import 'package:Fam.ly/modules/main/classes/group_message.dart';
+import 'package:Fam.ly/modules/shared/classes/firestore_user.dart';
 
 class GroupsProvider extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

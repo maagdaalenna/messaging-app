@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:messaging_app/modules/auth/providers/auth_provider.dart';
-import 'package:messaging_app/modules/shared/themes/extensions/theme_sizes_extension.dart';
+import 'package:Fam.ly/modules/auth/providers/auth_provider.dart';
+import 'package:Fam.ly/modules/shared/themes/extensions/theme_sizes_extension.dart';
 import 'package:provider/provider.dart';
 
 class MyProfileScreen extends StatefulWidget {

@@ -2,11 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:messaging_app/modules/auth/classes/login_credentials.dart';
-import 'package:messaging_app/modules/auth/providers/auth_navigation_provider.dart';
-import 'package:messaging_app/modules/auth/providers/auth_provider.dart';
-import 'package:messaging_app/modules/auth/providers/email_provider.dart';
-import 'package:messaging_app/modules/shared/themes/extensions/theme_sizes_extension.dart';
+import 'package:Fam.ly/modules/auth/classes/login_credentials.dart';
+import 'package:Fam.ly/modules/auth/providers/auth_navigation_provider.dart';
+import 'package:Fam.ly/modules/auth/providers/auth_provider.dart';
+import 'package:Fam.ly/modules/auth/providers/email_provider.dart';
+import 'package:Fam.ly/modules/shared/themes/extensions/theme_sizes_extension.dart';
 import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {

@@ -1,4 +1,4 @@
-name: messaging_app
+name: Fam.ly
 description: A new Flutter project.
 
 publish_to: 'none'
@@ -16,6 +16,7 @@ dependencies:
   font_awesome_flutter: ^10.1.0
   provider: ^6.0.3
   infinite_scroll_pagination: ^3.2.0
+  icons_launcher: ^2.0.4
 
   cloud_firestore: ^3.4.9
   # firebase_core: ^1.23.0
@@ -26,7 +27,7 @@ dev_dependencies:
     sdk: flutter
 
 icons_launcher:
-  image_path: "assets/famly-logo.png"
+  image_path: "assets/icons/famly-icon.png"
   platforms:
     android:
       enable: true
@@ -38,3 +39,4 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/icons/

@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.messaging_app">
    <application
-        android:label="messaging_app"
+        android:label="Fam.ly"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

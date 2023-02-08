@@ -1,4 +1,4 @@
-import 'package:messaging_app/modules/shared/classes/firestore_user.dart';
+import 'package:Fam.ly/modules/shared/classes/firestore_user.dart';
 
 class GroupMessage {
   final String? id;

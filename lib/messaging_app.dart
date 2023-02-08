@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:messaging_app/modules/auth/providers/auth_navigation_provider.dart';
-import 'package:messaging_app/modules/auth/providers/auth_provider.dart';
-import 'package:messaging_app/modules/auth/providers/email_provider.dart';
-import 'package:messaging_app/modules/auth/screens/auth_screen.dart';
-import 'package:messaging_app/modules/auth/screens/confirm_account_screen.dart';
-import 'package:messaging_app/modules/main/providers/group_chat_provider.dart';
-import 'package:messaging_app/modules/main/providers/groups_provider.dart';
-import 'package:messaging_app/modules/main/screens/chat_screen.dart';
-import 'package:messaging_app/modules/main/screens/main_screen.dart';
-import 'package:messaging_app/modules/shared/themes/app_theme.dart';
+import 'package:Fam.ly/modules/auth/providers/auth_navigation_provider.dart';
+import 'package:Fam.ly/modules/auth/providers/auth_provider.dart';
+import 'package:Fam.ly/modules/auth/providers/email_provider.dart';
+import 'package:Fam.ly/modules/auth/screens/auth_screen.dart';
+import 'package:Fam.ly/modules/auth/screens/confirm_account_screen.dart';
+import 'package:Fam.ly/modules/main/providers/group_chat_provider.dart';
+import 'package:Fam.ly/modules/main/providers/groups_provider.dart';
+import 'package:Fam.ly/modules/main/screens/main_screen.dart';
+import 'package:Fam.ly/modules/shared/themes/app_theme.dart';
 import 'package:provider/provider.dart';
 
 class MessagingApp extends StatefulWidget {

@@ -1,4 +1,4 @@
-import 'package:messaging_app/modules/main/classes/group.dart';
+import 'package:Fam.ly/modules/main/classes/group.dart';
 
 class GroupItem {
   final Group group;

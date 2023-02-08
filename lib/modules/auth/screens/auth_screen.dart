@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:messaging_app/modules/auth/providers/auth_navigation_provider.dart';
-import 'package:messaging_app/modules/auth/screens/login_screen.dart';
-import 'package:messaging_app/modules/auth/screens/register_screen.dart';
+import 'package:Fam.ly/modules/auth/providers/auth_navigation_provider.dart';
+import 'package:Fam.ly/modules/auth/screens/login_screen.dart';
+import 'package:Fam.ly/modules/auth/screens/register_screen.dart';
 import 'package:provider/provider.dart';
 
 class AuthScreen extends StatefulWidget {

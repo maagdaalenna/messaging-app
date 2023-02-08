@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:messaging_app/modules/shared/themes/extensions/theme_sizes_extension.dart';
+import 'package:Fam.ly/modules/shared/themes/extensions/theme_sizes_extension.dart';
 
 class AppTheme {
   AppTheme._();
