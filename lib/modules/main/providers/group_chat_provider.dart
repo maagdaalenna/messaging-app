@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:Fam.ly/modules/main/classes/private_message.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +13,7 @@ import 'package:Fam.ly/modules/shared/classes/firestore_user.dart';
 class GroupChatProvider extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  StreamSubscription<QuerySnapshot>? _eventsSubscription;
 
   // 20 items per page
   static const _pageSize = 15;
@@ -18,6 +22,7 @@ class GroupChatProvider extends ChangeNotifier {
   final PagingController<GroupMessage?, MessageItem> _pagingController =
       PagingController(firstPageKey: null);
 
+  bool isFirstTime = true;
   bool loading = false;
   String? error = null;
   Group? _currentGroup;
@@ -66,20 +71,72 @@ class GroupChatProvider extends ChangeNotifier {
     }
   }
 
+  Future<Map<String, dynamic>> _fromFirestoreToGroupMessage(
+    DocumentSnapshot<Map<String, dynamic>> doc,
+  ) async {
+    var json = doc.data()!;
+    var userJson = await _firestore
+        .collection("users")
+        .doc(json["from"])
+        .get()
+        .then((snapshot) {
+      var userJson = snapshot.data();
+      if (userJson != null) userJson["id"] = snapshot.id;
+      return userJson;
+    });
+
+    json["datetime"] =
+        DateTime.parse((json["datetime"] as Timestamp).toDate().toString());
+    json["from"] = userJson != null
+        ? FirestoreUser.fromJson(userJson)
+        : FirestoreUser(id: "", displayName: "Unknown", email: "");
+    json["id"] = doc.id;
+
+    return json;
+  }
+
   void initialise(Group currentGroup) {
+    isFirstTime = true;
     this._currentGroup = currentGroup;
     String gid = _currentGroup!.id!;
     _pagingController.addPageRequestListener((pageKey) {
       _fetchPage(pageKey);
     });
-    _firestore
+    _eventsSubscription = _firestore
         .collection("groups")
         .doc(gid)
         .collection("messages")
         .snapshots()
         .listen((event) {
-      event.docChanges.forEach((element) {});
+      if (isFirstTime) {
+        isFirstTime = false;
+        return;
+      }
+      print("something changed!!!!!!!!!!!!!!!!!");
+      event.docChanges.forEach((element) async {
+        if (_pagingController.itemList != null) {
+          var json = await _fromFirestoreToGroupMessage(element.doc);
+          var message = GroupMessage.fromJson(json);
+          _pagingController.itemList!.insert(
+              0,
+              MessageItem(
+                body: message.body,
+                from: (currentUser.id != message.from.id)
+                    ? message.from.displayName
+                    : "You",
+                time: message.datetime.hour.toString() +
+                    ":" +
+                    message.datetime.minute.toString(),
+              ));
+          notifyListeners();
+        }
+      });
     });
+  }
+
+  void cancelEventsSubscription() {
+    isFirstTime = false;
+    if (_eventsSubscription != null) _eventsSubscription!.cancel();
   }
 
   Future<List<GroupMessage>> getMessagesForCurrentGroup(
@@ -99,24 +156,7 @@ class GroupChatProvider extends ChangeNotifier {
       jsons = await query.limit(pageSize).get().then((snapshot) async {
         List<Map<String, dynamic>> jsons = [];
         for (final doc in snapshot.docs) {
-          var json = doc.data();
-
-          var userJson = await _firestore
-              .collection("users")
-              .doc(json["from"])
-              .get()
-              .then((snapshot) {
-            var userJson = snapshot.data();
-            if (userJson != null) userJson["id"] = snapshot.id;
-            return userJson;
-          });
-
-          json["datetime"] = DateTime.parse(
-              (json["datetime"] as Timestamp).toDate().toString());
-          json["from"] = userJson != null
-              ? FirestoreUser.fromJson(userJson)
-              : FirestoreUser(id: "", displayName: "Unknown", email: "");
-          json["id"] = doc.id;
+          var json = await _fromFirestoreToGroupMessage(doc);
           jsons.add(json);
         }
         return jsons;
@@ -129,24 +169,7 @@ class GroupChatProvider extends ChangeNotifier {
           .then((snapshot) async {
             List<Map<String, dynamic>> jsons = [];
             for (final doc in snapshot.docs) {
-              var json = doc.data();
-
-              var userJson = await _firestore
-                  .collection("users")
-                  .doc(json["from"])
-                  .get()
-                  .then((snapshot) {
-                var userJson = snapshot.data();
-                if (userJson != null) userJson["id"] = snapshot.id;
-                return userJson;
-              });
-
-              json["datetime"] = DateTime.parse(
-                  (json["datetime"] as Timestamp).toDate().toString());
-              json["from"] = userJson != null
-                  ? FirestoreUser.fromJson(userJson)
-                  : FirestoreUser(id: "", displayName: "Unknown", email: "");
-              json["id"] = doc.id;
+              var json = await _fromFirestoreToGroupMessage(doc);
               jsons.add(json);
             }
             return jsons;

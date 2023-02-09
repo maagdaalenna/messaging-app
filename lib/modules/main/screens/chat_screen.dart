@@ -19,6 +19,12 @@ class _ChatScreenState extends State<ChatScreen> {
   final _messageController = TextEditingController();
 
   @override
+  void dispose() {
+    _groupChatProvider.cancelEventsSubscription();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final themeSizes = theme.extension<ThemeSizesExtension>()!;
