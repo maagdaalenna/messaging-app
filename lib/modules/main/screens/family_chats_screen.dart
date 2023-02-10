@@ -19,50 +19,6 @@ class _FamilyChatsScreenState extends State<FamilyChatsScreen> {
   late GroupsProvider _groupsProvider;
   late GroupChatProvider _groupChatProvider;
 
-  // 20 items per page
-  static const _pageSize = 20;
-
-  // we need a controller for the infinite list view
-  final PagingController<Group?, GroupItem> _pagingController =
-      PagingController(firstPageKey: null);
-
-  @override
-  void initState() {
-    _pagingController.addPageRequestListener((pageKey) {
-      _fetchPage(pageKey);
-    });
-    super.initState();
-  }
-
-  Future<void> _fetchPage(Group? pageKey) async {
-    try {
-      final newGroups = await _groupsProvider.getGroupsForCurrentUser(
-        pageKey,
-        _pageSize,
-      );
-
-      List<GroupItem> newGroupItems = [];
-
-      for (Group group in newGroups) {
-        var lastMessage = await _groupsProvider.getLastMessage(group.id!);
-        newGroupItems.add(GroupItem(
-          group: group,
-          lastFrom: lastMessage.from.displayName,
-          lastMessage: lastMessage.body,
-        ));
-      }
-      final isLastPage = newGroups.length < _pageSize;
-      if (isLastPage) {
-        _pagingController.appendLastPage(newGroupItems);
-      } else {
-        final nextPageKey = newGroups.last;
-        _pagingController.appendPage(newGroupItems, nextPageKey);
-      }
-    } catch (error) {
-      _pagingController.error = error;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -83,9 +39,9 @@ class _FamilyChatsScreenState extends State<FamilyChatsScreen> {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
-      body: (_pagingController.itemList == null
+      body: (_groupsProvider.pagingController.itemList == null
               ? false
-              : _pagingController.itemList!.isEmpty)
+              : _groupsProvider.pagingController.itemList!.isEmpty)
           ? Padding(
               padding: EdgeInsets.all(themeSizes.spacingLarge),
               child: Center(
@@ -100,7 +56,7 @@ class _FamilyChatsScreenState extends State<FamilyChatsScreen> {
               ),
             )
           : PagedListView<Group?, GroupItem>(
-              pagingController: _pagingController,
+              pagingController: _groupsProvider.pagingController,
               builderDelegate: PagedChildBuilderDelegate<GroupItem>(
                 itemBuilder: (context, groupItem, index) => ListTile(
                   contentPadding: EdgeInsets.only(
@@ -144,7 +100,7 @@ class _FamilyChatsScreenState extends State<FamilyChatsScreen> {
 
   @override
   void dispose() {
-    _pagingController.dispose();
+    _groupsProvider.cancelEventsSubscription();
     super.dispose();
   }
 }

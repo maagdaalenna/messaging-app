@@ -1,13 +1,72 @@
+import 'dart:async';
+
+import 'package:Fam.ly/modules/main/classes/group_item.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:Fam.ly/modules/main/classes/group.dart';
 import 'package:Fam.ly/modules/main/classes/group_message.dart';
 import 'package:Fam.ly/modules/shared/classes/firestore_user.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
 class GroupsProvider extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  StreamSubscription<QuerySnapshot>? _eventsSubscription;
+
+  // 20 items per page
+  static const _pageSize = 20;
+
+  // we need a controller for the infinite list view
+  final PagingController<Group?, GroupItem> pagingController =
+      PagingController(firstPageKey: null);
+
+  bool isFirstTime = true;
+
+  GroupsProvider() {
+    initialise();
+  }
+
+  Future<void> _fetchPage(Group? pageKey) async {
+    try {
+      final newGroups = await getGroupsForCurrentUser(
+        pageKey,
+        _pageSize,
+      );
+
+      List<GroupItem> newGroupItems = [];
+
+      for (Group group in newGroups) {
+        var lastMessage = await getLastMessage(group.id!);
+        newGroupItems.add(GroupItem(
+          group: group,
+          lastFrom: lastMessage.from.displayName,
+          lastMessage: lastMessage.body,
+        ));
+      }
+      final isLastPage = newGroups.length < _pageSize;
+      if (isLastPage) {
+        pagingController.appendLastPage(newGroupItems);
+      } else {
+        final nextPageKey = newGroups.last;
+        pagingController.appendPage(newGroupItems, nextPageKey);
+      }
+    } catch (error) {
+      pagingController.error = error;
+    }
+  }
+
+  void initialise() {
+    isFirstTime = true;
+    pagingController.addPageRequestListener((pageKey) {
+      _fetchPage(pageKey);
+    });
+  }
+
+  void cancelEventsSubscription() {
+    isFirstTime = false;
+    if (_eventsSubscription != null) _eventsSubscription!.cancel();
+  }
 
   Future<List<Group>> getGroupsForCurrentUser(
     Group? lastGroup,
