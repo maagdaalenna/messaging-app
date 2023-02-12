@@ -1,8 +1,8 @@
+import 'package:Fam.ly/modules/main/providers/groups_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:Fam.ly/modules/main/classes/group_message.dart';
 import 'package:Fam.ly/modules/main/classes/message_item.dart';
-import 'package:Fam.ly/modules/main/providers/group_chat_provider.dart';
 import 'package:Fam.ly/modules/main/widgets/message_tile.dart';
 import 'package:Fam.ly/modules/shared/themes/extensions/theme_sizes_extension.dart';
 import 'package:provider/provider.dart';
@@ -15,14 +15,14 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  late GroupChatProvider _groupChatProvider;
+  late GroupsProvider _groupsProvider;
   final _messageController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final themeSizes = theme.extension<ThemeSizesExtension>()!;
-    _groupChatProvider = Provider.of(context);
+    _groupsProvider = Provider.of(context);
 
     return Scaffold(
       backgroundColor: theme.colorScheme.background,
@@ -49,8 +49,13 @@ class _ChatScreenState extends State<ChatScreen> {
         title: TextButton(
           onPressed: () {},
           child: Text(
-            _groupChatProvider.currentGroup!.name,
-            style: TextStyle(fontWeight: FontWeight.bold),
+            _groupsProvider.currentGroup!.name,
+            style: TextStyle(
+              color: theme.colorScheme.onPrimary,
+              fontSize: themeSizes.iconSmall,
+              fontWeight: FontWeight.bold,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ),
       ),
@@ -61,9 +66,10 @@ class _ChatScreenState extends State<ChatScreen> {
         child: Column(
           children: [
             Expanded(
-              child: (_groupChatProvider.pagingController.itemList == null
+              child: (_groupsProvider.currentPagingController!.itemList == null
                       ? false
-                      : _groupChatProvider.pagingController.itemList!.isEmpty)
+                      : _groupsProvider
+                          .currentPagingController!.itemList!.isEmpty)
                   ? Padding(
                       padding: EdgeInsets.all(themeSizes.spacingLarge),
                       child: Center(
@@ -79,10 +85,12 @@ class _ChatScreenState extends State<ChatScreen> {
                     )
                   : PagedListView<GroupMessage?, MessageItem>(
                       reverse: true,
-                      pagingController: _groupChatProvider.pagingController,
+                      pagingController:
+                          _groupsProvider.currentPagingController!,
                       builderDelegate: PagedChildBuilderDelegate<MessageItem>(
                         itemBuilder: (context, messageItem, index) =>
                             MessageTile(
+                          onRight: messageItem.onRight,
                           header: messageItem.showFromAndDate(),
                           body: messageItem.body,
                         ),
@@ -123,11 +131,10 @@ class _ChatScreenState extends State<ChatScreen> {
                     onPressed: () {
                       var groupMessage = GroupMessage(
                         body: _messageController.text,
-                        from: _groupChatProvider.currentUser,
+                        from: _groupsProvider.currentUser,
                         datetime: DateTime.now(),
                       );
-                      _groupChatProvider
-                          .addMessageForCurrentGroup(groupMessage);
+                      _groupsProvider.addMessageForCurrentGroup(groupMessage);
                       _messageController.clear();
                     },
                     icon: Icon(Icons.send),
@@ -139,11 +146,5 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _groupChatProvider.cancelEventsSubscription();
-    super.dispose();
   }
 }

@@ -1,8 +1,5 @@
+import 'package:Fam.ly/modules/shared/widgets/placeholder_profile_picture.dart';
 import 'package:flutter/material.dart';
-import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
-import 'package:Fam.ly/modules/main/classes/group.dart';
-import 'package:Fam.ly/modules/main/classes/group_item.dart';
-import 'package:Fam.ly/modules/main/providers/group_chat_provider.dart';
 import 'package:Fam.ly/modules/main/providers/groups_provider.dart';
 import 'package:Fam.ly/modules/main/screens/chat_screen.dart';
 import 'package:Fam.ly/modules/shared/themes/extensions/theme_sizes_extension.dart';
@@ -17,14 +14,18 @@ class FamilyChatsScreen extends StatefulWidget {
 
 class _FamilyChatsScreenState extends State<FamilyChatsScreen> {
   late GroupsProvider _groupsProvider;
-  late GroupChatProvider _groupChatProvider;
+  bool isFirstBuild = true;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final themeSizes = theme.extension<ThemeSizesExtension>()!;
     _groupsProvider = Provider.of(context);
-    _groupChatProvider = Provider.of(context);
+
+    if (isFirstBuild) {
+      _groupsProvider.loadGroupsForCurrentUser();
+      isFirstBuild = false;
+    }
 
     return Scaffold(
       backgroundColor: theme.colorScheme.background,
@@ -39,50 +40,54 @@ class _FamilyChatsScreenState extends State<FamilyChatsScreen> {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
-      body: (_groupsProvider.pagingController.itemList == null
-              ? false
-              : _groupsProvider.pagingController.itemList!.isEmpty)
-          ? Padding(
-              padding: EdgeInsets.all(themeSizes.spacingLarge),
-              child: Center(
-                child: Text(
-                  "Press on the + button to get started by joining or creating a family group!",
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: theme.colorScheme.onSecondary,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            )
-          : PagedListView<Group?, GroupItem>(
-              pagingController: _groupsProvider.pagingController,
-              builderDelegate: PagedChildBuilderDelegate<GroupItem>(
-                itemBuilder: (context, groupItem, index) => ListTile(
-                  contentPadding: EdgeInsets.only(
-                    left: themeSizes.spacingMedium,
-                    right: themeSizes.spacingMedium,
-                  ),
-                  onTap: () {
-                    _groupChatProvider.initialise(groupItem.group);
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const ChatScreen(),
+      body: !_groupsProvider.firstGroupLoaded
+          ? Center(child: CircularProgressIndicator())
+          : (_groupsProvider.groups.isEmpty)
+              ? Padding(
+                  padding: EdgeInsets.all(themeSizes.spacingLarge),
+                  child: Center(
+                    child: Text(
+                      "Press on the + button to get started by joining or creating a family group!",
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: theme.colorScheme.onSecondary,
                       ),
-                    );
-                  },
-                  leading: CircleAvatar(radius: 24),
-                  title: Text(groupItem.group.name),
-                  subtitle: Text(
-                    groupItem.showUserAndMessage(),
-                    style: TextStyle(
-                      color: theme.colorScheme.onSecondary,
-                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
                     ),
                   ),
-                ),
-              ),
-            ),
+                )
+              : ListView.builder(
+                  itemCount: _groupsProvider.groups.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    var group = _groupsProvider.groups[index];
+                    return ListTile(
+                      contentPadding: EdgeInsets.only(
+                        left: themeSizes.spacingMedium,
+                        right: themeSizes.spacingMedium,
+                      ),
+                      onTap: () {
+                        _groupsProvider.initialise(index);
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const ChatScreen(),
+                          ),
+                        );
+                      },
+                      leading: PlaceholderProfilePicture(),
+                      title: Text(group.name),
+                      subtitle: Text(
+                        _groupsProvider
+                                .pagingControllerList[index].itemList![0].from +
+                            ": " +
+                            _groupsProvider
+                                .pagingControllerList[index].itemList![0].body,
+                        style: TextStyle(
+                          color: theme.colorScheme.onBackground,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    );
+                  }),
       floatingActionButton: FloatingActionButton(
         heroTag: null, // solves the heroes error
         onPressed: () {},
@@ -100,7 +105,7 @@ class _FamilyChatsScreenState extends State<FamilyChatsScreen> {
 
   @override
   void dispose() {
-    _groupsProvider.cancelEventsSubscription();
+    _groupsProvider.disposeEverything();
     super.dispose();
   }
 }

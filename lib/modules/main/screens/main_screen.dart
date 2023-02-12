@@ -16,7 +16,7 @@ class _MainScreenState extends State<MainScreen> {
 
   void _onNavigationItemTap(int index) {
     setState(() {
-      // re-build the widget to display the new selected page
+      // call setState to re-build the widget to display the new selected page
       _selectedIndex = index;
     });
   }
@@ -24,8 +24,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final themeSizes =
-        theme.extension<ThemeSizesExtension>()!; // we surely know is not null
+    final themeSizes = theme.extension<ThemeSizesExtension>()!;
 
     return Container(
       child: Scaffold(

@@ -1,6 +1,7 @@
 class Group {
   final String? id;
   final String name;
+  // final Image profilePicture
 
   Group({
     this.id,
@@ -14,14 +15,3 @@ class Group {
     );
   }
 }
-
-
-// {
-//   "name": "Family 1",
-//   "members": {
-//     "member1": {
-//       "displayName": "Magda",
-//     }
-//   },
-//   "nr": 1,
-// }

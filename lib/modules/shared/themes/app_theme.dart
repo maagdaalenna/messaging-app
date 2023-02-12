@@ -16,7 +16,7 @@ class AppTheme {
         errorContainer: const Color(0xffff948c),
         onErrorContainer: const Color(0xffffffff),
         background: const Color(0xff131619),
-        onBackground: const Color(0xffffffff),
+        onBackground: const Color(0xc0ffffff),
         shadow: const Color(0x88000000),
       );
 
@@ -34,7 +34,7 @@ class AppTheme {
         iconMedium: 24,
         iconLarge: 28,
         iconLarger: 32,
-        iconLargest: 40,
+        iconLargest: 48,
         borderWidthSmall: .5,
         borderWidthMedium: 1,
         borderWidthLarge: 2,

@@ -4,11 +4,13 @@ import 'package:Fam.ly/modules/shared/themes/extensions/theme_sizes_extension.da
 class MessageTile extends StatelessWidget {
   final String header;
   final String body;
+  final bool onRight;
 
   const MessageTile({
     Key? key,
-    required String this.header,
-    required String this.body,
+    required this.header,
+    required this.body,
+    this.onRight = false,
   }) : super(key: key);
 
   @override
@@ -19,14 +21,63 @@ class MessageTile extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.all(themeSizes.spacingMedium),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment:
+            onRight ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
-          Text(header),
-          Row(
-            children: [
-              Text("|  "),
-              Text(body),
-            ],
+          Text(
+            header,
+            style: TextStyle(
+              color: theme.colorScheme.onBackground,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          IntrinsicHeight(
+            child: onRight
+                ? Row(
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          child: Text(
+                            body,
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                              overflow: TextOverflow.clip,
+                              color: theme.colorScheme.onBackground,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const VerticalDivider(
+                        width: 12,
+                        thickness: 1,
+                        indent: 2,
+                        endIndent: 0,
+                        color: Colors.white,
+                      ),
+                    ],
+                  )
+                : Row(
+                    children: [
+                      VerticalDivider(
+                        width: 12,
+                        thickness: 1,
+                        indent: 2,
+                        endIndent: 0,
+                        color: theme.colorScheme.onBackground,
+                      ),
+                      Expanded(
+                        child: SizedBox(
+                          child: Text(
+                            body,
+                            style: TextStyle(
+                              overflow: TextOverflow.clip,
+                              color: theme.colorScheme.onBackground,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
           ),
         ],
       ),
