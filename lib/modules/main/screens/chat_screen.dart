@@ -17,6 +17,7 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   late GroupsProvider _groupsProvider;
   final _messageController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -59,48 +60,42 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
         ),
       ),
-      body: Padding(
-        padding: EdgeInsets.only(
-          bottom: themeSizes.spacingSmall,
-        ),
-        child: Column(
-          children: [
-            Expanded(
-              child: (_groupsProvider.currentPagingController!.itemList == null
-                      ? false
-                      : _groupsProvider
-                          .currentPagingController!.itemList!.isEmpty)
-                  ? Padding(
-                      padding: EdgeInsets.all(themeSizes.spacingLarge),
-                      child: Center(
-                        child: Text(
-                          "There are no messages to show!",
-                          style: TextStyle(
-                            fontSize: 20,
-                            color: theme.colorScheme.onSecondary,
-                          ),
-                          textAlign: TextAlign.center,
+      body: Column(
+        children: [
+          Expanded(
+            child: (_groupsProvider.currentPagingController!.itemList == null
+                    ? false
+                    : _groupsProvider
+                        .currentPagingController!.itemList!.isEmpty)
+                ? Padding(
+                    padding: EdgeInsets.all(themeSizes.spacingLarge),
+                    child: Center(
+                      child: Text(
+                        "There are no messages to show!",
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: theme.colorScheme.onSecondary,
                         ),
-                      ),
-                    )
-                  : PagedListView<GroupMessage?, MessageItem>(
-                      reverse: true,
-                      pagingController:
-                          _groupsProvider.currentPagingController!,
-                      builderDelegate: PagedChildBuilderDelegate<MessageItem>(
-                        itemBuilder: (context, messageItem, index) =>
-                            MessageTile(
-                          onRight: messageItem.onRight,
-                          header: messageItem.showFromAndDate(),
-                          body: messageItem.body,
-                        ),
+                        textAlign: TextAlign.center,
                       ),
                     ),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: themeSizes.spacingSmall,
-              ),
+                  )
+                : PagedListView<GroupMessage?, MessageItem>(
+                    reverse: true,
+                    pagingController: _groupsProvider.currentPagingController!,
+                    builderDelegate: PagedChildBuilderDelegate<MessageItem>(
+                      itemBuilder: (context, messageItem, index) => MessageTile(
+                        onRight: messageItem.onRight,
+                        header: messageItem.showFromAndDate(),
+                        body: messageItem.body,
+                      ),
+                    ),
+                  ),
+          ),
+          Form(
+            key: _formKey,
+            child: Padding(
+              padding: EdgeInsets.all(themeSizes.spacingSmall),
               child: Row(
                 children: [
                   IconButton(
@@ -108,9 +103,19 @@ class _ChatScreenState extends State<ChatScreen> {
                     icon: Icon(Icons.camera_alt_sharp),
                   ),
                   Expanded(
-                    child: TextField(
+                    child: TextFormField(
+                      keyboardType: TextInputType.multiline,
+                      minLines: 1,
+                      maxLines: 5,
                       controller: _messageController,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "";
+                        }
+                        return null;
+                      },
                       decoration: InputDecoration(
+                        errorStyle: TextStyle(height: 0.01),
                         filled: true,
                         fillColor: theme.colorScheme.tertiary,
                         labelStyle: TextStyle(
@@ -128,22 +133,25 @@ class _ChatScreenState extends State<ChatScreen> {
                     width: themeSizes.spacingSmaller,
                   ),
                   IconButton(
+                    iconSize: 32,
                     onPressed: () {
-                      var groupMessage = GroupMessage(
-                        body: _messageController.text,
-                        from: _groupsProvider.currentUser,
-                        datetime: DateTime.now(),
-                      );
-                      _groupsProvider.addMessageForCurrentGroup(groupMessage);
-                      _messageController.clear();
+                      if (_formKey.currentState!.validate()) {
+                        var groupMessage = GroupMessage(
+                          body: _messageController.text,
+                          from: _groupsProvider.currentUser,
+                          datetime: DateTime.now(),
+                        );
+                        _groupsProvider.addMessageForCurrentGroup(groupMessage);
+                        _messageController.clear();
+                      }
                     },
                     icon: Icon(Icons.send),
                   ),
                 ],
               ),
-            )
-          ],
-        ),
+            ),
+          )
+        ],
       ),
     );
   }

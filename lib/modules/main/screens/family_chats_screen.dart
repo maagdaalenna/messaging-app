@@ -1,3 +1,4 @@
+import 'package:Fam.ly/modules/main/screens/join_or_create_group_screen.dart';
 import 'package:Fam.ly/modules/shared/widgets/placeholder_profile_picture.dart';
 import 'package:flutter/material.dart';
 import 'package:Fam.ly/modules/main/providers/groups_provider.dart';
@@ -76,11 +77,15 @@ class _FamilyChatsScreenState extends State<FamilyChatsScreen> {
                       leading: PlaceholderProfilePicture(),
                       title: Text(group.name),
                       subtitle: Text(
-                        _groupsProvider
-                                .pagingControllerList[index].itemList![0].from +
-                            ": " +
-                            _groupsProvider
-                                .pagingControllerList[index].itemList![0].body,
+                        _groupsProvider.pagingControllerList[index].itemList!
+                                    .length ==
+                                0
+                            ? "No messages."
+                            : _groupsProvider.pagingControllerList[index]
+                                    .itemList![0].from +
+                                ": " +
+                                _groupsProvider.pagingControllerList[index]
+                                    .itemList![0].body,
                         style: TextStyle(
                           color: theme.colorScheme.onBackground,
                           overflow: TextOverflow.ellipsis,
@@ -90,7 +95,13 @@ class _FamilyChatsScreenState extends State<FamilyChatsScreen> {
                   }),
       floatingActionButton: FloatingActionButton(
         heroTag: null, // solves the heroes error
-        onPressed: () {},
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const JoinOrCreateGroupScreen(),
+            ),
+          );
+        },
         backgroundColor: theme.colorScheme.primary,
         foregroundColor: theme.colorScheme.onPrimary,
         shape: RoundedRectangleBorder(

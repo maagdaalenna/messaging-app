@@ -47,12 +47,12 @@ class MessageTile extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const VerticalDivider(
+                      VerticalDivider(
                         width: 12,
                         thickness: 1,
                         indent: 2,
                         endIndent: 0,
-                        color: Colors.white,
+                        color: theme.colorScheme.onBackground,
                       ),
                     ],
                   )

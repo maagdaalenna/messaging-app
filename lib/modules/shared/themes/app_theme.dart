@@ -101,5 +101,32 @@ class AppTheme {
             ),
           ),
         ),
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: ButtonStyle(
+            side: MaterialStateProperty.all<BorderSide>(
+              BorderSide(
+                color: colorScheme.onBackground,
+              ),
+            ),
+            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(themeSizes.borderRadius),
+              ),
+            ),
+            foregroundColor: MaterialStateProperty.all(
+              colorScheme.secondary,
+            ),
+            minimumSize: MaterialStateProperty.all(
+              Size.fromHeight(
+                themeSizes.buttonMedium,
+              ),
+            ),
+            textStyle: MaterialStateProperty.all(
+              TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
       );
 }

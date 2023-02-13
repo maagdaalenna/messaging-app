@@ -18,6 +18,7 @@ dependencies:
   infinite_scroll_pagination: ^3.2.0
   icons_launcher: ^2.0.4
   intl: ^0.17.0
+  flutter_share: ^2.0.0
 
   cloud_firestore: ^3.4.9
   # firebase_core: ^1.23.0

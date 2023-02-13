@@ -128,7 +128,7 @@ class GroupsProvider extends ChangeNotifier {
             isFirstTimeBools[currentIndex] = false;
             return;
           }
-          print("something changed!!!!!!!!!!!!!!!!!");
+          // print("something changed!!!!!!!!!!!!!!!!!");
           event.docChanges.forEach((element) async {
             if (pagingController.itemList != null) {
               var json = await _fromFirestoreToGroupMessage(element.doc);
