@@ -40,9 +40,11 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
               child: _authProvider.loading
                   ? CircularProgressIndicator()
                   : Text("Log Out"),
-              onPressed: () {
-                _authProvider.logout();
-              },
+              onPressed: _authProvider.loading
+                  ? () {}
+                  : () {
+                      _authProvider.logout();
+                    },
             ),
           ],
         ),

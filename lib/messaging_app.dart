@@ -1,3 +1,4 @@
+import 'package:Fam.ly/modules/main/providers/join_create_group_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:Fam.ly/modules/auth/providers/auth_navigation_provider.dart';
 import 'package:Fam.ly/modules/auth/providers/auth_provider.dart';
@@ -22,7 +23,6 @@ class _MessagingAppState extends State<MessagingApp> {
         ChangeNotifierProvider(create: (context) => AuthProvider()),
         ChangeNotifierProvider(create: (context) => AuthNavigationProvider()),
         ChangeNotifierProvider(create: (context) => EmailProvider()),
-        ChangeNotifierProvider(create: (context) => GroupsProvider()),
       ],
       child: MaterialApp(
         title: 'Fam.ly',

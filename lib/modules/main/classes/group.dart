@@ -1,5 +1,5 @@
 class Group {
-  final String? id;
+  String? id;
   final String name;
   // final Image profilePicture
 
@@ -13,5 +13,16 @@ class Group {
       id: json["id"],
       name: json["name"],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      "name": this.name,
+    };
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is Group && other.runtimeType == runtimeType && other.id == id;
   }
 }

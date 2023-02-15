@@ -1,8 +1,11 @@
+import 'package:Fam.ly/modules/main/providers/groups_provider.dart';
+import 'package:Fam.ly/modules/main/providers/join_create_group_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:Fam.ly/modules/main/screens/family_chats_screen.dart';
 import 'package:Fam.ly/modules/main/screens/my_profile_screen.dart';
 import 'package:Fam.ly/modules/main/screens/private_chats_screen.dart';
 import 'package:Fam.ly/modules/shared/themes/extensions/theme_sizes_extension.dart';
+import 'package:provider/provider.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
@@ -26,58 +29,64 @@ class _MainScreenState extends State<MainScreen> {
     final theme = Theme.of(context);
     final themeSizes = theme.extension<ThemeSizesExtension>()!;
 
-    return Container(
-      child: Scaffold(
-        backgroundColor: theme.colorScheme.background,
-        body: IndexedStack(
-          index: _selectedIndex,
-          children: [
-            PrivateChatsScreen(),
-            FamilyChatsScreen(),
-            MyProfileScreen(),
-          ],
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: theme.colorScheme.primary,
-          selectedItemColor: theme.colorScheme.background,
-          unselectedItemColor: theme.colorScheme.onPrimary,
-          onTap: _onNavigationItemTap,
-          currentIndex: _selectedIndex,
-          items: [
-            BottomNavigationBarItem(
-              activeIcon: Padding(
-                padding: EdgeInsets.only(top: themeSizes.spacingSmall),
-                child: Icon(Icons.chat),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => GroupsProvider()),
+        ChangeNotifierProvider(create: (context) => JoinCreateGroupProvider()),
+      ],
+      child: Container(
+        child: Scaffold(
+          backgroundColor: theme.colorScheme.background,
+          body: IndexedStack(
+            index: _selectedIndex,
+            children: [
+              PrivateChatsScreen(),
+              FamilyChatsScreen(),
+              MyProfileScreen(),
+            ],
+          ),
+          bottomNavigationBar: BottomNavigationBar(
+            backgroundColor: theme.colorScheme.primary,
+            selectedItemColor: theme.colorScheme.background,
+            unselectedItemColor: theme.colorScheme.onPrimary,
+            onTap: _onNavigationItemTap,
+            currentIndex: _selectedIndex,
+            items: [
+              BottomNavigationBarItem(
+                activeIcon: Padding(
+                  padding: EdgeInsets.only(top: themeSizes.spacingSmall),
+                  child: Icon(Icons.chat),
+                ),
+                icon: Padding(
+                  padding: EdgeInsets.only(top: themeSizes.spacingSmall),
+                  child: Icon(Icons.chat_outlined),
+                ),
+                label: "",
               ),
-              icon: Padding(
-                padding: EdgeInsets.only(top: themeSizes.spacingSmall),
-                child: Icon(Icons.chat_outlined),
+              BottomNavigationBarItem(
+                activeIcon: Padding(
+                  padding: EdgeInsets.only(top: themeSizes.spacingSmall),
+                  child: Icon(Icons.family_restroom),
+                ),
+                icon: Padding(
+                  padding: EdgeInsets.only(top: themeSizes.spacingSmall),
+                  child: Icon(Icons.family_restroom_outlined),
+                ),
+                label: "",
               ),
-              label: "",
-            ),
-            BottomNavigationBarItem(
-              activeIcon: Padding(
-                padding: EdgeInsets.only(top: themeSizes.spacingSmall),
-                child: Icon(Icons.family_restroom),
+              BottomNavigationBarItem(
+                activeIcon: Padding(
+                  padding: EdgeInsets.only(top: themeSizes.spacingSmall),
+                  child: Icon(Icons.person),
+                ),
+                icon: Padding(
+                  padding: EdgeInsets.only(top: themeSizes.spacingSmall),
+                  child: Icon(Icons.person_outlined),
+                ),
+                label: "",
               ),
-              icon: Padding(
-                padding: EdgeInsets.only(top: themeSizes.spacingSmall),
-                child: Icon(Icons.family_restroom_outlined),
-              ),
-              label: "",
-            ),
-            BottomNavigationBarItem(
-              activeIcon: Padding(
-                padding: EdgeInsets.only(top: themeSizes.spacingSmall),
-                child: Icon(Icons.person),
-              ),
-              icon: Padding(
-                padding: EdgeInsets.only(top: themeSizes.spacingSmall),
-                child: Icon(Icons.person_outlined),
-              ),
-              label: "",
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

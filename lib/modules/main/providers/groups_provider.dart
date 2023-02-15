@@ -90,6 +90,80 @@ class GroupsProvider extends ChangeNotifier {
     }
   }
 
+  Future<Map<String, dynamic>> _fromFirestoreToGroupMessage(
+    DocumentSnapshot<Map<String, dynamic>> doc,
+  ) async {
+    var json = doc.data()!;
+    var userJson = await _firestore
+        .collection("users")
+        .doc(json["from"])
+        .get()
+        .then((snapshot) {
+      var userJson = snapshot.data();
+      if (userJson != null) userJson["id"] = snapshot.id;
+      return userJson;
+    });
+
+    json["datetime"] =
+        DateTime.parse((json["datetime"] as Timestamp).toDate().toString());
+    json["from"] = userJson != null
+        ? FirestoreUser.fromJson(userJson)
+        : FirestoreUser(id: "", displayName: "Unknown", email: "");
+    json["id"] = doc.id;
+
+    return json;
+  }
+
+  Future<void> addGroup(Group group) async {
+    String id = group.id!;
+    groups.add(group);
+    isFirstTimeBools.add(true);
+    PagingController<GroupMessage?, MessageItem> pagingController =
+        PagingController(firstPageKey: null);
+    pagingController.addPageRequestListener((pageKey) async {
+      await _fetchPage(id, pageKey, pagingController);
+    });
+    StreamSubscription<QuerySnapshot> eventsSubscription = _firestore
+        .collection("groups")
+        .doc(id)
+        .collection("messages")
+        .snapshots()
+        .listen((event) {
+      int currentIndex = groups.indexOf(group);
+      if (isFirstTimeBools[currentIndex]) {
+        isFirstTimeBools[currentIndex] = false;
+        return;
+      }
+      // print("something changed!!!!!!!!!!!!!!!!!");
+      event.docChanges.forEach((element) async {
+        if (pagingController.itemList != null) {
+          var json = await _fromFirestoreToGroupMessage(element.doc);
+          var message = GroupMessage.fromJson(json);
+          pagingController.itemList!.insert(
+              0,
+              MessageItem(
+                onRight: currentUser.id == message.from.id,
+                body: message.body,
+                from: (currentUser.id == message.from.id)
+                    ? "You"
+                    : message.from.displayName,
+                time: DateFormat.Hm().format(message.datetime) +
+                    ", " +
+                    DateFormat.yMMMd().format(message.datetime),
+              ));
+          notifyListeners();
+        }
+      });
+    });
+
+    // Loading the first page of messages for each group
+    await _fetchPage(id, null, pagingController);
+
+    pagingControllerList.add(pagingController);
+    eventsSubscriptionList.add(eventsSubscription);
+    notifyListeners();
+  }
+
   Future<void> loadGroupsForCurrentUser() async {
     String uid = _auth.currentUser!.uid;
     List<String> ids;
@@ -141,9 +215,9 @@ class GroupsProvider extends ChangeNotifier {
                     from: (currentUser.id == message.from.id)
                         ? "You"
                         : message.from.displayName,
-                    time: message.datetime.hour.toString() +
-                        ":" +
-                        message.datetime.minute.toString(),
+                    time: DateFormat.Hm().format(message.datetime) +
+                        ", " +
+                        DateFormat.yMMMd().format(message.datetime),
                   ));
               notifyListeners();
             }
@@ -160,30 +234,6 @@ class GroupsProvider extends ChangeNotifier {
         notifyListeners();
       }
     }
-  }
-
-  Future<Map<String, dynamic>> _fromFirestoreToGroupMessage(
-    DocumentSnapshot<Map<String, dynamic>> doc,
-  ) async {
-    var json = doc.data()!;
-    var userJson = await _firestore
-        .collection("users")
-        .doc(json["from"])
-        .get()
-        .then((snapshot) {
-      var userJson = snapshot.data();
-      if (userJson != null) userJson["id"] = snapshot.id;
-      return userJson;
-    });
-
-    json["datetime"] =
-        DateTime.parse((json["datetime"] as Timestamp).toDate().toString());
-    json["from"] = userJson != null
-        ? FirestoreUser.fromJson(userJson)
-        : FirestoreUser(id: "", displayName: "Unknown", email: "");
-    json["id"] = doc.id;
-
-    return json;
   }
 
   Future<List<GroupMessage>> getMessagesForGroup(

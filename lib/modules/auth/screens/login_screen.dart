@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:Fam.ly/modules/shared/widgets/famly_logo.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:Fam.ly/modules/auth/classes/login_credentials.dart';
@@ -84,9 +85,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Center(
                           child: FractionallySizedBox(
                             widthFactor: 0.2,
-                            child: Image(
-                              image: AssetImage("assets/images/famly-logo.png"),
-                            ),
+                            child: FamlyLogo(),
                           ),
                         ),
                       ),
@@ -165,15 +164,18 @@ class _LoginScreenState extends State<LoginScreen> {
                                 theme.colorScheme.onBackground,
                               ),
                             ),
-                            onPressed: () {
-                              if (_formKey.currentState!.validate()) {
-                                LoginCredentials credentials = LoginCredentials(
-                                  _emailAdressController.text,
-                                  _passwordController.text,
-                                );
-                                _authProvider.login(credentials);
-                              }
-                            },
+                            onPressed: _authProvider.loading
+                                ? () {}
+                                : () {
+                                    if (_formKey.currentState!.validate()) {
+                                      LoginCredentials credentials =
+                                          LoginCredentials(
+                                        _emailAdressController.text,
+                                        _passwordController.text,
+                                      );
+                                      _authProvider.login(credentials);
+                                    }
+                                  },
                             child: _authProvider.loading
                                 ? CircularProgressIndicator()
                                 : Text("Login"),

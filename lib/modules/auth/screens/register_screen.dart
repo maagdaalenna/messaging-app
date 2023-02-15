@@ -1,3 +1,4 @@
+import 'package:Fam.ly/modules/shared/widgets/famly_logo.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:Fam.ly/modules/auth/classes/register_credentials.dart';
@@ -49,9 +50,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         child: Center(
                           child: FractionallySizedBox(
                             widthFactor: 0.2,
-                            child: Image(
-                              image: AssetImage("assets/images/famly-logo.png"),
-                            ),
+                            child: FamlyLogo(),
                           ),
                         ),
                       ),
@@ -168,18 +167,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 theme.colorScheme.onBackground,
                               ),
                             ),
-                            onPressed: () {
-                              if (_formKey.currentState!.validate()) {
-                                RegisterCredentials credentials =
-                                    RegisterCredentials(
-                                  _emailAdressController.text,
-                                  _passwordController.text,
-                                  _confirmPasswordController.text,
-                                  _displayNameController.text,
-                                );
-                                _authProvider.register(credentials);
-                              }
-                            },
+                            onPressed: _authProvider.loading
+                                ? () {}
+                                : () {
+                                    if (_formKey.currentState!.validate()) {
+                                      RegisterCredentials credentials =
+                                          RegisterCredentials(
+                                        _emailAdressController.text,
+                                        _passwordController.text,
+                                        _confirmPasswordController.text,
+                                        _displayNameController.text,
+                                      );
+                                      _authProvider.register(credentials);
+                                    }
+                                  },
                             child: _authProvider.loading
                                 ? CircularProgressIndicator()
                                 : Text("Create Account"),
