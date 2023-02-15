@@ -23,6 +23,8 @@ class _MessagingAppState extends State<MessagingApp> {
         ChangeNotifierProvider(create: (context) => AuthProvider()),
         ChangeNotifierProvider(create: (context) => AuthNavigationProvider()),
         ChangeNotifierProvider(create: (context) => EmailProvider()),
+        ChangeNotifierProvider(create: (context) => GroupsProvider()),
+        ChangeNotifierProvider(create: (context) => JoinCreateGroupProvider()),
       ],
       child: MaterialApp(
         title: 'Fam.ly',
