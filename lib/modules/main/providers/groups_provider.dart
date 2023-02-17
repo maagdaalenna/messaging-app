@@ -106,14 +106,6 @@ class GroupsProvider extends ChangeNotifier {
     return json;
   }
 
-  Map<String, dynamic> _getFirestoreUserJsonFromDoc(
-    DocumentSnapshot<Map<String, dynamic>> doc,
-  ) {
-    var json = doc.data()!;
-    json["id"] = doc.id;
-    return json;
-  }
-
   GroupProviderItem _initGroupProviderItem(Group group) {
     bool isFirstTimeBool = true;
 
@@ -194,14 +186,25 @@ class GroupsProvider extends ChangeNotifier {
   }
 
   Future<void> addGroup(Group group) async {
-    String id = group.id!;
+    String gid = group.id!;
 
     GroupProviderItem groupProviderItem = _initGroupProviderItem(group);
 
     // Loading the first page of messages for each group
-    await _fetchPage(id, null, groupProviderItem.pagingController);
+    await _fetchPage(gid, null, groupProviderItem.pagingController);
 
     _addToListInOrder(groupProviderItem);
+    notifyListeners();
+  }
+
+  Future<void> removeGroup(Group group) async {
+    String gid = group.id!;
+    for (int i = 0; i < groupList.length; i++) {
+      if (groupList[i].group.id == gid) {
+        groupList.removeAt(i);
+        break;
+      }
+    }
     notifyListeners();
   }
 

@@ -68,7 +68,7 @@ class JoinCreateGroupProvider extends ChangeNotifier {
 
       loading = false;
       notifyListeners();
-    } on FirebaseException catch (e) {
+    } on FirebaseException catch (_) {
       error = "Unknown error.";
       loading = false;
       notifyListeners();
@@ -99,7 +99,36 @@ class JoinCreateGroupProvider extends ChangeNotifier {
       loading = false;
       result = gid;
       notifyListeners();
-    } on FirebaseException catch (e) {
+    } on FirebaseException catch (_) {
+      error = "Unknown error.";
+      loading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> leaveGroup(String gid) async {
+    loading = true;
+    error = null;
+    notifyListeners();
+    try {
+      String uid = currentUser.id!;
+
+      await _firestore
+          .collection("users")
+          .doc(uid)
+          .collection("groups")
+          .doc(gid)
+          .delete();
+      await _firestore
+          .collection("groups")
+          .doc(gid)
+          .collection("members")
+          .doc(uid)
+          .delete();
+
+      loading = false;
+      notifyListeners();
+    } on FirebaseException catch (_) {
       error = "Unknown error.";
       loading = false;
       notifyListeners();

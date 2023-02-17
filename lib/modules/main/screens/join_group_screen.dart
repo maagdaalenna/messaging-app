@@ -105,7 +105,14 @@ class _JoinGroupScreenState extends State<JoinGroupScreen> {
                                             actions: <Widget>[
                                               TextButton(
                                                 onPressed: () {
-                                                  Navigator.of(context).pop();
+                                                  Navigator.of(context)
+                                                      .popUntil(
+                                                    (route) {
+                                                      return !Navigator.of(
+                                                              context)
+                                                          .canPop();
+                                                    },
+                                                  );
                                                 },
                                                 child: const Text("Continue"),
                                               ),

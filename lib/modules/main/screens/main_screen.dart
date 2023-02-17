@@ -1,11 +1,8 @@
-import 'package:Fam.ly/modules/main/providers/groups_provider.dart';
-import 'package:Fam.ly/modules/main/providers/join_create_group_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:Fam.ly/modules/main/screens/family_chats_screen.dart';
 import 'package:Fam.ly/modules/main/screens/my_profile_screen.dart';
 import 'package:Fam.ly/modules/main/screens/private_chats_screen.dart';
 import 'package:Fam.ly/modules/shared/themes/extensions/theme_sizes_extension.dart';
-import 'package:provider/provider.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);

@@ -1,4 +1,3 @@
-import 'package:Fam.ly/modules/main/classes/group.dart';
 import 'package:Fam.ly/modules/main/classes/group_provider_item.dart';
 import 'package:Fam.ly/modules/main/screens/join_or_create_group_screen.dart';
 import 'package:Fam.ly/modules/shared/widgets/placeholder_profile_picture.dart';

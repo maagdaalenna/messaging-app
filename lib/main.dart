@@ -9,3 +9,6 @@ Future<void> main() async {
 
   runApp(MessagingApp());
 }
+
+// To build app-release.apk open Terminal and write:
+// flutter build apk --release
