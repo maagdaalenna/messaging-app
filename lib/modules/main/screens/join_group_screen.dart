@@ -91,36 +91,48 @@ class _JoinGroupScreenState extends State<JoinGroupScreen> {
                                 _familyCodeController.clear();
                                 _joinCreateGroupProvider.joinGroup(gid).then(
                                   (value) {
-                                    Group group = _joinCreateGroupProvider
-                                        .result! as Group;
-                                    _groupsProvider.addGroup(group);
-                                    showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return AlertDialog(
-                                          title: Text(
-                                              "Successfully joined the ${group.name}!"),
-                                          content: IntrinsicHeight(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                    "Press continue to be directed to the Family Chats Screen."),
-                                              ],
+                                    if (_joinCreateGroupProvider.error ==
+                                        null) {
+                                      Group group = _joinCreateGroupProvider
+                                          .result! as Group;
+                                      _groupsProvider.addGroup(group);
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: Text(
+                                                "Successfully joined ${group.name}!"),
+                                            actions: <Widget>[
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                },
+                                                child: const Text("Continue"),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    } else {
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: Text(
+                                              _joinCreateGroupProvider.error!,
                                             ),
-                                          ),
-                                          actions: <Widget>[
-                                            TextButton(
-                                              onPressed: () {
-                                                Navigator.of(context).pop();
-                                              },
-                                              child: const Text("Continue"),
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    );
+                                            actions: <Widget>[
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                },
+                                                child: const Text("Okay"),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    }
                                   },
                                 );
                               }

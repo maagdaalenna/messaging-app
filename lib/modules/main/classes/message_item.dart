@@ -1,17 +1,30 @@
+import 'package:Fam.ly/modules/main/classes/group_message.dart';
+import 'package:intl/intl.dart';
+
 class MessageItem {
-  final String body;
-  final String from;
-  final String time;
-  final bool onRight;
+  final GroupMessage groupMessage;
+  final bool isFromCurrentUser;
 
   MessageItem({
-    required this.body,
-    required this.from,
-    required this.time,
-    this.onRight = false,
+    required this.groupMessage,
+    required this.isFromCurrentUser,
   });
 
+  String get from {
+    return (isFromCurrentUser) ? "You" : groupMessage.from.displayName;
+  }
+
+  String get dateTimeString {
+    return DateFormat.Hm().format(groupMessage.datetime) +
+        ", " +
+        DateFormat.yMMMd().format(groupMessage.datetime);
+  }
+
   String showFromAndDate() {
-    return from + ", " + time;
+    return from + ", " + dateTimeString;
+  }
+
+  String showFromAndBody() {
+    return from + ": " + groupMessage.body;
   }
 }

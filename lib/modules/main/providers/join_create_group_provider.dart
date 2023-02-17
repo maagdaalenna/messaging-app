@@ -28,18 +28,7 @@ class JoinCreateGroupProvider extends ChangeNotifier {
     notifyListeners();
     try {
       String uid = currentUser.id!;
-      await _firestore
-          .collection("users")
-          .doc(uid)
-          .collection("groups")
-          .doc(gid)
-          .set(Map<String, dynamic>());
-      await _firestore
-          .collection("groups")
-          .doc(gid)
-          .collection("members")
-          .doc(uid)
-          .set(Map<String, dynamic>());
+
       var json = await _firestore
           .collection("groups")
           .doc(gid)
@@ -49,14 +38,38 @@ class JoinCreateGroupProvider extends ChangeNotifier {
       if (json != null) {
         json["id"] = gid;
         result = Group.fromJson(json);
+
+        var doc = await _firestore
+            .collection("users")
+            .doc(uid)
+            .collection("groups")
+            .doc(gid)
+            .get();
+
+        if (!doc.exists) {
+          await _firestore
+              .collection("users")
+              .doc(uid)
+              .collection("groups")
+              .doc(gid)
+              .set(Map<String, dynamic>());
+          await _firestore
+              .collection("groups")
+              .doc(gid)
+              .collection("members")
+              .doc(uid)
+              .set(Map<String, dynamic>());
+        } else {
+          error = "You are already in this Family Group!";
+        }
       } else {
-        error = "Group not found!";
+        error = "Family Group not found!";
       }
 
       loading = false;
       notifyListeners();
     } on FirebaseException catch (e) {
-      error = e.message;
+      error = "Unknown error.";
       loading = false;
       notifyListeners();
     }
@@ -87,7 +100,7 @@ class JoinCreateGroupProvider extends ChangeNotifier {
       result = gid;
       notifyListeners();
     } on FirebaseException catch (e) {
-      error = e.message;
+      error = "Unknown error.";
       loading = false;
       notifyListeners();
     }

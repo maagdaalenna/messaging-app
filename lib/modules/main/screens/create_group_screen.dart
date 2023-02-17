@@ -90,7 +90,10 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                               if (_formKey.currentState!.validate()) {
                                 String name = _familyNameController.text;
                                 _familyNameController.clear();
-                                Group group = Group(name: name);
+                                Group group = Group(
+                                  name: name,
+                                  created: DateTime.now(),
+                                );
                                 _joinCreateGroupProvider
                                     .createGroup(group)
                                     .then(

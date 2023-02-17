@@ -1,4 +1,5 @@
 import 'package:Fam.ly/modules/main/providers/groups_provider.dart';
+import 'package:Fam.ly/modules/main/screens/group_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:Fam.ly/modules/main/classes/group_message.dart';
@@ -48,7 +49,13 @@ class _ChatScreenState extends State<ChatScreen> {
         ],
         backgroundColor: theme.colorScheme.primary,
         title: TextButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const GroupDetailsScreen(),
+              ),
+            );
+          },
           child: Text(
             _groupsProvider.currentGroup!.name,
             style: TextStyle(
@@ -85,9 +92,9 @@ class _ChatScreenState extends State<ChatScreen> {
                     pagingController: _groupsProvider.currentPagingController!,
                     builderDelegate: PagedChildBuilderDelegate<MessageItem>(
                       itemBuilder: (context, messageItem, index) => MessageTile(
-                        onRight: messageItem.onRight,
+                        onRight: messageItem.isFromCurrentUser,
                         header: messageItem.showFromAndDate(),
-                        body: messageItem.body,
+                        body: messageItem.groupMessage.body,
                       ),
                     ),
                   ),
@@ -109,7 +116,9 @@ class _ChatScreenState extends State<ChatScreen> {
                       maxLines: 5,
                       controller: _messageController,
                       validator: (value) {
-                        if (value == null || value.isEmpty) {
+                        if (value == null ||
+                            value.isEmpty ||
+                            value.trim().isEmpty) {
                           return "";
                         }
                         return null;

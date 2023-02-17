@@ -2,7 +2,11 @@ import 'package:Fam.ly/modules/shared/themes/extensions/theme_sizes_extension.da
 import 'package:flutter/material.dart';
 
 class PlaceholderProfilePicture extends StatelessWidget {
-  const PlaceholderProfilePicture({Key? key}) : super(key: key);
+  final double? size;
+  const PlaceholderProfilePicture({
+    Key? key,
+    this.size,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -13,10 +17,11 @@ class PlaceholderProfilePicture extends StatelessWidget {
 
     return ClipRRect(
       borderRadius: BorderRadius.all(Radius.circular(themeSizes.borderRadius)),
-      child: SizedBox(
-        width: themeSizes.iconLargest,
-        height: themeSizes.iconLargest,
-        child: Container(color: Colors.black),
+      child: SizedBox.square(
+        dimension: size,
+        child: Image(
+          image: AssetImage("assets/images/placeholder-profile-picture.jpg"),
+        ),
       ),
     );
   }
