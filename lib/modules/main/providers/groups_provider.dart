@@ -19,12 +19,12 @@ class GroupsProvider extends ChangeNotifier {
 
   GroupProviderItem? _currentGroupProviderItem;
 
-  // 30 items per page
+  // 30 messages per page
   final _pageSize = 30;
 
   bool lastGroupLoaded = false;
 
-  List<GroupProviderItem> groupList = [];
+  List<GroupProviderItem> groupProviderItemList = [];
 
   GroupProviderItem? get currentGroupProviderItem {
     return _currentGroupProviderItem;
@@ -44,24 +44,28 @@ class GroupsProvider extends ChangeNotifier {
     return FirestoreUser.fromUser(_auth.currentUser!);
   }
 
+  // called when clicking on a group to set the current group
   void initialise(GroupProviderItem currentGroupProviderItem) {
-    this._currentGroupProviderItem = currentGroupProviderItem;
+    _currentGroupProviderItem = currentGroupProviderItem;
   }
 
+  // it is called by the paging controllers when the user scrolls up to load
+  // more messages
   Future<void> _fetchPage(
-    String gid,
+    String groupId,
     GroupMessage? pageKey,
     PagingController<GroupMessage?, MessageItem> pagingController,
   ) async {
     try {
-      final newMessages = await getMessagesForGroup(
-        gid,
+      // request the next 30 messages from the group from firestore
+      List<GroupMessage> newMessages = await getMessagesForGroup(
+        groupId,
         pageKey,
         _pageSize,
       );
 
+      // convert each GroupMessage to MessageItem
       List<MessageItem> newMessageItems = [];
-
       for (GroupMessage message in newMessages) {
         newMessageItems.add(
           MessageItem(
@@ -70,11 +74,15 @@ class GroupsProvider extends ChangeNotifier {
           ),
         );
       }
-      final isLastPage = newMessages.length < _pageSize;
+
+      // if the number of received messages is less that 30 then there are no
+      // messages left and this is the last page of messages
+      bool isLastPage = newMessages.length < _pageSize;
       if (isLastPage) {
         pagingController.appendLastPage(newMessageItems);
       } else {
-        final nextPageKey = newMessages.last;
+        // set the next page key to the last received message
+        GroupMessage nextPageKey = newMessages.last;
         pagingController.appendPage(newMessageItems, nextPageKey);
       }
     } catch (error) {
@@ -82,10 +90,17 @@ class GroupsProvider extends ChangeNotifier {
     }
   }
 
+  // gets the json of the message from a document and enriches it with an "id"
+  // and replaces the user id from the "from" key with the whole user after
+  // getting it from firestore
   Future<Map<String, dynamic>> _getGroupMessageJsonFromDoc(
     DocumentSnapshot<Map<String, dynamic>> doc,
   ) async {
+    // get the json from the document
     var json = doc.data()!;
+    // get the id of the document and put it in the json
+    json["id"] = doc.id;
+    // get the json of the user that sent the message from firestore
     var userJson = await _firestore
         .collection("users")
         .doc(json["from"])
@@ -95,43 +110,44 @@ class GroupsProvider extends ChangeNotifier {
       if (userJson != null) userJson["id"] = snapshot.id;
       return userJson;
     });
-
-    json["datetime"] =
-        DateTime.parse((json["datetime"] as Timestamp).toDate().toString());
     json["from"] = userJson != null
         ? FirestoreUser.fromJson(userJson)
         : FirestoreUser(id: "", displayName: "Deleted Account", email: "");
-    json["id"] = doc.id;
 
     return json;
   }
 
+  // initialises a GroupProviderItem from a given Group
   GroupProviderItem _initGroupProviderItem(Group group) {
-    bool isFirstTimeBool = true;
+    bool isFirstCall = true;
 
+    // sets the paging controller
     PagingController<GroupMessage?, MessageItem> pagingController =
         PagingController(firstPageKey: null);
 
     GroupProviderItem groupProviderItem = GroupProviderItem(
       group: group,
       pagingController: pagingController,
-      isFirstTimeBool: true,
     );
 
+    // sets the event subscription to listen to new messages in firestore
     StreamSubscription<QuerySnapshot> eventsSubscription = _firestore
         .collection("groups")
         .doc(group.id)
         .collection("messages")
         .snapshots()
         .listen((event) {
-      if (isFirstTimeBool) {
-        isFirstTimeBool = false;
+      // when the event subscription is created, our function is firstly called
+      // as if everything is changed, so we want to skip over the first call
+      if (isFirstCall) {
+        isFirstCall = false;
         return;
       }
-      // print("something changed!!!!!!!!!!!!!!!!!");
-      event.docChanges.forEach((element) async {
+
+      // for each new message, insert it in the list
+      event.docChanges.forEach((documentChange) async {
         if (pagingController.itemList != null) {
-          var json = await _getGroupMessageJsonFromDoc(element.doc);
+          var json = await _getGroupMessageJsonFromDoc(documentChange.doc);
           var message = GroupMessage.fromJson(json);
           pagingController.itemList!.insert(
             0,
@@ -143,11 +159,12 @@ class GroupsProvider extends ChangeNotifier {
           notifyListeners();
         }
       });
-      _moveElementOnTop(groupProviderItem);
+      _moveGroupProviderItemOnTop(groupProviderItem);
     });
 
     groupProviderItem.eventsSubscription = eventsSubscription;
 
+    // give a function to be called when the users scrolls up to load more messages
     pagingController.addPageRequestListener((pageKey) async {
       await _fetchPage(group.id!, pageKey, pagingController);
     });
@@ -155,53 +172,54 @@ class GroupsProvider extends ChangeNotifier {
     return groupProviderItem;
   }
 
-  void _moveElementOnTop(GroupProviderItem groupProviderItem) {
+  void _moveGroupProviderItemOnTop(GroupProviderItem groupProviderItem) {
     int? index = null;
-    for (int i = 0; i < groupList.length; i++) {
-      if (groupList[i].group.id == groupProviderItem.group.id) {
+    for (int i = 0; i < groupProviderItemList.length; i++) {
+      if (groupProviderItemList[i].group.id == groupProviderItem.group.id) {
         index = i;
         break;
       }
     }
     if (index != null || index != 0) {
-      groupList.removeAt(index!);
-      groupList.insert(0, groupProviderItem);
+      groupProviderItemList.removeAt(index!);
+      groupProviderItemList.insert(0, groupProviderItem);
     }
   }
 
   void _addToListInOrder(GroupProviderItem groupProviderItem) {
-    if (groupList.isEmpty) {
-      groupList.add(groupProviderItem);
+    if (groupProviderItemList.isEmpty) {
+      groupProviderItemList.add(groupProviderItem);
       return;
     }
-    for (int i = 0; i < groupList.length; i++) {
-      if (groupList[i]
+    for (int i = 0; i < groupProviderItemList.length; i++) {
+      if (groupProviderItemList[i]
           .datetimeOfLastMessage
           .isBefore(groupProviderItem.datetimeOfLastMessage)) {
-        groupList.insert(i, groupProviderItem);
+        groupProviderItemList.insert(i, groupProviderItem);
         return;
       }
     }
-    groupList.add(groupProviderItem);
+    groupProviderItemList.add(groupProviderItem);
   }
 
   Future<void> addGroup(Group group) async {
-    String gid = group.id!;
+    String groupId = group.id!;
 
     GroupProviderItem groupProviderItem = _initGroupProviderItem(group);
 
-    // Loading the first page of messages for each group
-    await _fetchPage(gid, null, groupProviderItem.pagingController);
+    // loading the first page of messages for each group
+    await _fetchPage(groupId, null, groupProviderItem.pagingController);
 
     _addToListInOrder(groupProviderItem);
     notifyListeners();
   }
 
   Future<void> removeGroup(Group group) async {
-    String gid = group.id!;
-    for (int i = 0; i < groupList.length; i++) {
-      if (groupList[i].group.id == gid) {
-        groupList.removeAt(i);
+    String groupId = group.id!;
+    for (int i = 0; i < groupProviderItemList.length; i++) {
+      if (groupProviderItemList[i].group.id == groupId) {
+        var groupProviderItem = groupProviderItemList.removeAt(i);
+        groupProviderItem.dispose();
         break;
       }
     }
@@ -209,31 +227,31 @@ class GroupsProvider extends ChangeNotifier {
   }
 
   Future<void> loadGroupsForCurrentUser() async {
-    String uid = _auth.currentUser!.uid;
+    String userId = _auth.currentUser!.uid;
     List<String> ids;
 
     ids = await _firestore
         .collection("users")
-        .doc(uid)
+        .doc(userId)
         .collection("groups")
         .get()
         .then((snapshot) => [for (final doc in snapshot.docs) doc.id.trim()]);
 
-    for (var gid in ids) {
+    for (var groupId in ids) {
       var json = await _firestore
           .collection("groups")
-          .doc(gid)
+          .doc(groupId)
           .get()
           .then((snapshot) => snapshot.data());
 
       if (json != null) {
-        json["id"] = gid;
+        json["id"] = groupId;
         var group = Group.fromJson(json);
 
         GroupProviderItem groupProviderItem = _initGroupProviderItem(group);
 
         // Loading the first page of messages for each group
-        await _fetchPage(gid, null, groupProviderItem.pagingController);
+        await _fetchPage(groupId, null, groupProviderItem.pagingController);
         _addToListInOrder(groupProviderItem);
         notifyListeners();
       }
@@ -243,7 +261,7 @@ class GroupsProvider extends ChangeNotifier {
   }
 
   Future<List<FirestoreUser>> getMembersForCurrentGroup(
-    FirestoreUser? lastMember,
+    FirestoreUser? lastLoadedMember,
     int pageSize,
   ) async {
     List<String> ids;
@@ -251,7 +269,7 @@ class GroupsProvider extends ChangeNotifier {
         .collection("groups")
         .doc(_currentGroupProviderItem!.group.id!)
         .collection("members");
-    if (lastMember == null) {
+    if (lastLoadedMember == null) {
       ids = await query.limit(pageSize).get().then((snapshot) async {
         List<String> ids = [];
         for (final doc in snapshot.docs) {
@@ -261,7 +279,7 @@ class GroupsProvider extends ChangeNotifier {
       });
     } else {
       ids = await query
-          .startAfter([lastMember.id])
+          .startAfter([lastLoadedMember.id])
           .limit(pageSize)
           .get()
           .then((snapshot) async {
@@ -273,21 +291,21 @@ class GroupsProvider extends ChangeNotifier {
           });
     }
 
-    List<FirestoreUser> newMembers = [];
-    for (var uid in ids) {
+    List<FirestoreUser> newlyLoadedMembers = [];
+    for (var userId in ids) {
       var json = await _firestore
           .collection("users")
-          .doc(uid)
+          .doc(userId)
           .get()
           .then((snapshot) => snapshot.data());
 
       if (json != null) {
-        json["id"] = uid;
+        json["id"] = userId;
         var member = FirestoreUser.fromJson(json);
-        newMembers.add(member);
+        newlyLoadedMembers.add(member);
       }
     }
-    return newMembers;
+    return newlyLoadedMembers;
   }
 
   Future<List<GroupMessage>> getMessagesForGroup(
@@ -339,7 +357,7 @@ class GroupsProvider extends ChangeNotifier {
   Future<void> addMessageForCurrentGroup(
     GroupMessage groupMessage,
   ) async {
-    String gid = currentGroup!.id!;
+    String groupId = currentGroup!.id!;
     if (loading == true) return;
     error = null;
     loading = true;
@@ -348,7 +366,7 @@ class GroupsProvider extends ChangeNotifier {
     try {
       await _firestore
           .collection("groups")
-          .doc(gid)
+          .doc(groupId)
           .collection("messages")
           .add(groupMessage.toJson());
       loading = false;
@@ -361,13 +379,13 @@ class GroupsProvider extends ChangeNotifier {
   }
 
   void disposeEverything() {
-    for (var groupProviderItem in groupList) {
+    for (var groupProviderItem in groupProviderItemList) {
       groupProviderItem.dispose();
     }
     loading = false;
     error = null;
     _currentGroupProviderItem = null;
     lastGroupLoaded = false;
-    groupList = [];
+    groupProviderItemList = [];
   }
 }

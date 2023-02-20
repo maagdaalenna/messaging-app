@@ -8,13 +8,11 @@ import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
 class GroupProviderItem {
   final Group group;
-  bool isFirstTimeBool;
   final PagingController<GroupMessage?, MessageItem> pagingController;
   StreamSubscription<QuerySnapshot>? eventsSubscription;
 
   GroupProviderItem({
     required this.group,
-    required this.isFirstTimeBool,
     required this.pagingController,
     this.eventsSubscription,
   });

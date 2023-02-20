@@ -7,7 +7,6 @@ class EmailProvider extends ChangeNotifier {
   String? error = null;
 
   Future<void> sendEmailVerification() async {
-    if (loading == true) return;
     if (_auth.currentUser == null) return;
     error = null;
     loading = true;
@@ -19,12 +18,17 @@ class EmailProvider extends ChangeNotifier {
   }
 
   Future<void> sendPasswordResetEmail(String email) async {
-    if (loading == true) return;
     error = null;
     loading = true;
     notifyListeners();
     try {
-      await _auth.sendPasswordResetEmail(email: email);
+      List<String> userSignInMethods =
+          await _auth.fetchSignInMethodsForEmail(email);
+      if (userSignInMethods.length == 0) {
+        error = "Email not found!";
+      } else {
+        await _auth.sendPasswordResetEmail(email: email);
+      }
       loading = false;
       notifyListeners();
     } on FirebaseException catch (e) {

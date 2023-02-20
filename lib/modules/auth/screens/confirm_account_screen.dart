@@ -20,9 +20,11 @@ class _ConfirmAccountScreenState extends State<ConfirmAccountScreen> {
   late Timer _resendCooldownTimer;
   int _resendCooldown = 10;
 
+  // a method that is called before the first build of the stateful widget
   @override
   void initState() {
     super.initState();
+    // confirmation email sent when account created so timer starts when the page is loaded
     _startTimer();
   }
 
@@ -33,6 +35,7 @@ class _ConfirmAccountScreenState extends State<ConfirmAccountScreen> {
     _resendCooldownTimer = Timer.periodic(
       Duration(seconds: 1),
       (timer) {
+        // make sure its mounted so we can call setState
         if (mounted) {
           setState(() {
             _resendCooldown--;
@@ -70,7 +73,7 @@ class _ConfirmAccountScreenState extends State<ConfirmAccountScreen> {
                 textAlign: TextAlign.center,
               ),
               Text(
-                "${_authProvider.user!.email}",
+                "${_authProvider.currentUser!.email}",
                 textAlign: TextAlign.center,
               ),
               Text(
@@ -125,6 +128,7 @@ class _ConfirmAccountScreenState extends State<ConfirmAccountScreen> {
     );
   }
 
+  // a method that is called when the widget is removed from the widget tree (is no longer active on the screen)
   @override
   void dispose() {
     _resendCooldownTimer.cancel();

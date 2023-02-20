@@ -210,10 +210,12 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
               shrinkWrap: true,
               pagingController: _pagingController,
               builderDelegate: PagedChildBuilderDelegate<FirestoreUserItem>(
-                itemBuilder: (context, firestoreUserItem, index) => MemberTile(
-                  name: firestoreUserItem.firestoreUser.displayName,
-                  email: firestoreUserItem.firestoreUser.email,
-                ),
+                itemBuilder: (context, firestoreUserItem, index) {
+                  return MemberTile(
+                    name: firestoreUserItem.firestoreUser.displayName,
+                    email: firestoreUserItem.firestoreUser.email,
+                  );
+                },
               ),
             ),
           ],

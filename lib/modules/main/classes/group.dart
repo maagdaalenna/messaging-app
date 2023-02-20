@@ -16,8 +16,7 @@ class Group {
     return Group(
       id: json["id"],
       name: json["name"],
-      created:
-          DateTime.parse((json["created"] as Timestamp).toDate().toString()),
+      created: (json["created"] as Timestamp).toDate(),
     );
   }
 

@@ -11,7 +11,7 @@ class AuthProvider extends ChangeNotifier {
   bool loading = false;
   String? error = null;
 
-  User? get user {
+  User? get currentUser {
     return _auth.currentUser;
   }
 
@@ -20,7 +20,7 @@ class AuthProvider extends ChangeNotifier {
   }
 
   bool? get confirmed {
-    return authenticated ? user!.emailVerified : null;
+    return authenticated ? currentUser!.emailVerified : null;
   }
 
   Future<void> reload() async {
@@ -47,7 +47,6 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> register(RegisterCredentials credentials) async {
-    if (loading == true) return;
     error = null;
     loading = true;
     notifyListeners();
@@ -74,10 +73,11 @@ class AuthProvider extends ChangeNotifier {
         displayName: _auth.currentUser!.displayName!,
         email: _auth.currentUser!.email!,
       );
+      // upload to firestore
       await _firestore
           .collection("users")
           .doc(userToUpload.id)
-          .set(userToUpload.toJson()); // upload to firestore
+          .set(userToUpload.toJson());
       await _auth.currentUser!.sendEmailVerification();
       loading = false;
       notifyListeners();

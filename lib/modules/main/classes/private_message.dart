@@ -1,4 +1,5 @@
 import 'package:Fam.ly/modules/shared/classes/firestore_user.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PrivateMessage {
   final String? id;
@@ -20,7 +21,7 @@ class PrivateMessage {
       id: json["id"],
       body: json["body"],
       from: json["from"],
-      datetime: json["datetime"],
+      datetime: (json["datetime"] as Timestamp).toDate(),
       to: json["to"],
     );
   }

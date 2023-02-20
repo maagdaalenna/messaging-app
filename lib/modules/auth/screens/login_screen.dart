@@ -61,7 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final themeSizes = theme.extension<ThemeSizesExtension>()!; // is not null
+    final themeSizes = theme.extension<ThemeSizesExtension>()!;
     _authProvider = Provider.of(context);
     _authNavigationProvider = Provider.of(context, listen: false);
     _emailProvider = Provider.of(context);
@@ -113,6 +113,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 color: theme.colorScheme.primary,
                               ),
                             ),
+                            // check if text field is empty
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return "Enter your email adress!";
@@ -194,6 +195,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                           SizedBox(height: themeSizes.spacingSmaller),
+                          // if the cooldown didn't hit 0 yet make the button inactive, else active
                           _resendCooldown != 0
                               ? TextButton(
                                   onPressed: null,
@@ -202,12 +204,23 @@ class _LoginScreenState extends State<LoginScreen> {
                                 )
                               : TextButton(
                                   onPressed: () {
-                                    _emailProvider.sendPasswordResetEmail(
-                                        _emailAdressController.text);
-                                    _startTimer();
+                                    _emailProvider
+                                        .sendPasswordResetEmail(
+                                            _emailAdressController.text)
+                                        .then((value) {
+                                      if (_emailProvider.error == null) {
+                                        _startTimer();
+                                      }
+                                    });
                                   },
                                   child: Text("Forgot password?"),
                                 ),
+                          if (_emailProvider.error != null)
+                            Text(
+                              _emailProvider.error!,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: theme.colorScheme.error),
+                            ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [

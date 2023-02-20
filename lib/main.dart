@@ -7,8 +7,9 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
+  // run the main widget
   runApp(MessagingApp());
 }
 
-// To build app-release.apk open Terminal and write:
+// to build app-release.apk open Terminal and write:
 // flutter build apk --release

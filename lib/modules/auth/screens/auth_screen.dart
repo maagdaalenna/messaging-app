@@ -18,6 +18,7 @@ class _AuthScreenState extends State<AuthScreen> {
   Widget build(BuildContext context) {
     _authNavigationProvider = Provider.of(context);
 
+    // if the active page is the login page show the LoginScreen, else show the RegisterScreen
     return _authNavigationProvider.activeAuthPage == ActiveAuthPage.login
         ? LoginScreen()
         : RegisterScreen();

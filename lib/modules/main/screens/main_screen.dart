@@ -15,8 +15,8 @@ class _MainScreenState extends State<MainScreen> {
   var _selectedIndex = 1;
 
   void _onNavigationItemTap(int index) {
+    // call setState to re-build the widget to display the new selected page
     setState(() {
-      // call setState to re-build the widget to display the new selected page
       _selectedIndex = index;
     });
   }
@@ -31,6 +31,7 @@ class _MainScreenState extends State<MainScreen> {
         backgroundColor: theme.colorScheme.background,
         body: IndexedStack(
           index: _selectedIndex,
+          // three main pages
           children: [
             PrivateChatsScreen(),
             FamilyChatsScreen(),

@@ -1,5 +1,6 @@
 import 'package:Fam.ly/modules/main/classes/group_provider_item.dart';
 import 'package:Fam.ly/modules/main/screens/join_or_create_group_screen.dart';
+import 'package:Fam.ly/modules/main/widgets/group_tile.dart';
 import 'package:Fam.ly/modules/shared/widgets/placeholder_profile_picture.dart';
 import 'package:flutter/material.dart';
 import 'package:Fam.ly/modules/main/providers/groups_provider.dart';
@@ -42,7 +43,7 @@ class _FamilyChatsScreenState extends State<FamilyChatsScreen> {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
-      body: (_groupsProvider.groupList.isEmpty &&
+      body: (_groupsProvider.groupProviderItemList.isEmpty &&
               _groupsProvider.lastGroupLoaded)
           ? Padding(
               padding: EdgeInsets.all(themeSizes.spacingLarge),
@@ -57,55 +58,41 @@ class _FamilyChatsScreenState extends State<FamilyChatsScreen> {
                 ),
               ),
             )
-          : ListView.builder(
-              itemCount: _groupsProvider.lastGroupLoaded
-                  ? _groupsProvider.groupList.length
-                  : _groupsProvider.groupList.length + 1,
-              itemBuilder: (BuildContext context, int index) {
-                if (!_groupsProvider.lastGroupLoaded &&
-                    index == _groupsProvider.groupList.length) {
-                  return Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(themeSizes.spacingSmall),
-                      child: CircularProgressIndicator(),
-                    ),
-                  );
-                } else {
-                  GroupProviderItem groupProviderItem =
-                      _groupsProvider.groupList[index];
-                  return ListTile(
-                    contentPadding: EdgeInsets.only(
-                      left: themeSizes.spacingMedium,
-                      right: themeSizes.spacingMedium,
-                    ),
-                    onTap: () {
-                      _groupsProvider.initialise(groupProviderItem);
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const ChatScreen(),
-                        ),
+          : Column(
+              children: [
+                ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: _groupsProvider.groupProviderItemList.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      GroupProviderItem groupProviderItem =
+                          _groupsProvider.groupProviderItemList[index];
+                      return GroupTile(
+                        name: groupProviderItem.group.name,
+                        fromAndBody: _groupsProvider
+                                    .groupProviderItemList[index]
+                                    .lastMessageItem ==
+                                null
+                            ? "No messages."
+                            : _groupsProvider
+                                .groupProviderItemList[index].lastMessageItem!
+                                .showFromAndBody(),
+                        onTap: () {
+                          _groupsProvider.initialise(groupProviderItem);
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const ChatScreen(),
+                            ),
+                          );
+                        },
                       );
-                    },
-                    leading:
-                        PlaceholderProfilePicture(size: themeSizes.iconLargest),
-                    title: Text(
-                      groupProviderItem.group.name,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    subtitle: Text(
-                      maxLines: 1,
-                      _groupsProvider.groupList[index].lastMessageItem == null
-                          ? "No messages."
-                          : _groupsProvider.groupList[index].lastMessageItem!
-                              .showFromAndBody(),
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: theme.colorScheme.onBackground,
-                      ),
-                    ),
-                  );
-                }
-              }),
+                    }),
+                if (!_groupsProvider.lastGroupLoaded)
+                  Padding(
+                    padding: EdgeInsets.all(themeSizes.spacingSmall),
+                    child: CircularProgressIndicator(),
+                  ),
+              ],
+            ),
       floatingActionButton: FloatingActionButton(
         heroTag: null, // solves the heroes error
         onPressed: () {
