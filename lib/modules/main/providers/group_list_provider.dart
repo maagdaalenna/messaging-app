@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:Fam.ly/modules/main/classes/group_provider_item.dart';
+import 'package:Fam.ly/modules/main/classes/enhanced_group.dart';
 import 'package:Fam.ly/modules/main/classes/message_item.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -10,43 +10,22 @@ import 'package:Fam.ly/modules/main/classes/group_message.dart';
 import 'package:Fam.ly/modules/shared/classes/firestore_user.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
-class GroupsProvider extends ChangeNotifier {
+class GroupListProvider extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   bool loading = false;
   String? error = null;
 
-  GroupProviderItem? _currentGroupProviderItem;
-
   // 30 messages per page
-  final _pageSize = 30;
+  final int _pageSize = 30;
 
   bool lastGroupLoaded = false;
 
-  List<GroupProviderItem> groupProviderItemList = [];
-
-  GroupProviderItem? get currentGroupProviderItem {
-    return _currentGroupProviderItem;
-  }
-
-  Group? get currentGroup {
-    if (_currentGroupProviderItem == null) return null;
-    return _currentGroupProviderItem!.group;
-  }
-
-  PagingController<GroupMessage?, MessageItem>? get currentPagingController {
-    if (_currentGroupProviderItem == null) return null;
-    return _currentGroupProviderItem!.pagingController;
-  }
+  List<EnhancedGroup> enhancedGroupList = [];
 
   FirestoreUser get currentUser {
     return FirestoreUser.fromUser(_auth.currentUser!);
-  }
-
-  // called when clicking on a group to set the current group
-  void initialise(GroupProviderItem currentGroupProviderItem) {
-    _currentGroupProviderItem = currentGroupProviderItem;
   }
 
   // it is called by the paging controllers when the user scrolls up to load
@@ -117,15 +96,15 @@ class GroupsProvider extends ChangeNotifier {
     return json;
   }
 
-  // initialises a GroupProviderItem from a given Group
-  GroupProviderItem _initGroupProviderItem(Group group) {
+  // initialises a EnhancedGroup from a given Group
+  EnhancedGroup _initEnhancedGroup(Group group) {
     bool isFirstCall = true;
 
     // sets the paging controller
     PagingController<GroupMessage?, MessageItem> pagingController =
         PagingController(firstPageKey: null);
 
-    GroupProviderItem groupProviderItem = GroupProviderItem(
+    EnhancedGroup enhancedGroup = EnhancedGroup(
       group: group,
       pagingController: pagingController,
     );
@@ -159,67 +138,67 @@ class GroupsProvider extends ChangeNotifier {
           notifyListeners();
         }
       });
-      _moveGroupProviderItemOnTop(groupProviderItem);
+      _moveEnhancedGroupOnTop(enhancedGroup);
     });
 
-    groupProviderItem.eventsSubscription = eventsSubscription;
+    enhancedGroup.eventsSubscription = eventsSubscription;
 
     // give a function to be called when the users scrolls up to load more messages
     pagingController.addPageRequestListener((pageKey) async {
       await _fetchPage(group.id!, pageKey, pagingController);
     });
 
-    return groupProviderItem;
+    return enhancedGroup;
   }
 
-  void _moveGroupProviderItemOnTop(GroupProviderItem groupProviderItem) {
+  void _moveEnhancedGroupOnTop(EnhancedGroup enhancedGroup) {
     int? index = null;
-    for (int i = 0; i < groupProviderItemList.length; i++) {
-      if (groupProviderItemList[i].group.id == groupProviderItem.group.id) {
+    for (int i = 0; i < enhancedGroupList.length; i++) {
+      if (enhancedGroupList[i].group.id == enhancedGroup.group.id) {
         index = i;
         break;
       }
     }
     if (index != null || index != 0) {
-      groupProviderItemList.removeAt(index!);
-      groupProviderItemList.insert(0, groupProviderItem);
+      enhancedGroupList.removeAt(index!);
+      enhancedGroupList.insert(0, enhancedGroup);
     }
   }
 
-  void _addToListInOrder(GroupProviderItem groupProviderItem) {
-    if (groupProviderItemList.isEmpty) {
-      groupProviderItemList.add(groupProviderItem);
+  void _addToListInOrder(EnhancedGroup enhancedGroup) {
+    if (enhancedGroupList.isEmpty) {
+      enhancedGroupList.add(enhancedGroup);
       return;
     }
-    for (int i = 0; i < groupProviderItemList.length; i++) {
-      if (groupProviderItemList[i]
+    for (int i = 0; i < enhancedGroupList.length; i++) {
+      if (enhancedGroupList[i]
           .datetimeOfLastMessage
-          .isBefore(groupProviderItem.datetimeOfLastMessage)) {
-        groupProviderItemList.insert(i, groupProviderItem);
+          .isBefore(enhancedGroup.datetimeOfLastMessage)) {
+        enhancedGroupList.insert(i, enhancedGroup);
         return;
       }
     }
-    groupProviderItemList.add(groupProviderItem);
+    enhancedGroupList.add(enhancedGroup);
   }
 
   Future<void> addGroup(Group group) async {
     String groupId = group.id!;
 
-    GroupProviderItem groupProviderItem = _initGroupProviderItem(group);
+    EnhancedGroup enhancedGroup = _initEnhancedGroup(group);
 
     // loading the first page of messages for each group
-    await _fetchPage(groupId, null, groupProviderItem.pagingController);
+    await _fetchPage(groupId, null, enhancedGroup.pagingController);
 
-    _addToListInOrder(groupProviderItem);
+    _addToListInOrder(enhancedGroup);
     notifyListeners();
   }
 
   Future<void> removeGroup(Group group) async {
     String groupId = group.id!;
-    for (int i = 0; i < groupProviderItemList.length; i++) {
-      if (groupProviderItemList[i].group.id == groupId) {
-        var groupProviderItem = groupProviderItemList.removeAt(i);
-        groupProviderItem.dispose();
+    for (int i = 0; i < enhancedGroupList.length; i++) {
+      if (enhancedGroupList[i].group.id == groupId) {
+        EnhancedGroup enhancedGroup = enhancedGroupList.removeAt(i);
+        enhancedGroup.dispose();
         break;
       }
     }
@@ -248,11 +227,11 @@ class GroupsProvider extends ChangeNotifier {
         json["id"] = groupId;
         var group = Group.fromJson(json);
 
-        GroupProviderItem groupProviderItem = _initGroupProviderItem(group);
+        EnhancedGroup enhancedGroup = _initEnhancedGroup(group);
 
         // Loading the first page of messages for each group
-        await _fetchPage(groupId, null, groupProviderItem.pagingController);
-        _addToListInOrder(groupProviderItem);
+        await _fetchPage(groupId, null, enhancedGroup.pagingController);
+        _addToListInOrder(enhancedGroup);
         notifyListeners();
       }
     }
@@ -306,86 +285,13 @@ class GroupsProvider extends ChangeNotifier {
     return messages;
   }
 
-  Future<void> addMessageForCurrentGroup(
-    GroupMessage groupMessage,
-  ) async {
-    String groupId = currentGroup!.id!;
-    if (loading == true) return;
-    error = null;
-    loading = true;
-    notifyListeners();
-
-    try {
-      await _firestore
-          .collection("groups")
-          .doc(groupId)
-          .collection("messages")
-          .add(groupMessage.toJson());
-      loading = false;
-      notifyListeners();
-    } on FirebaseException catch (e) {
-      error = e.message;
-      loading = false;
-      notifyListeners();
-    }
-  }
-
   void disposeEverything() {
-    for (var groupProviderItem in groupProviderItemList) {
-      groupProviderItem.dispose();
+    for (EnhancedGroup enhancedGroup in enhancedGroupList) {
+      enhancedGroup.dispose();
     }
     loading = false;
     error = null;
-    _currentGroupProviderItem = null;
     lastGroupLoaded = false;
-    groupProviderItemList = [];
-  }
-
-  Future<List<FirestoreUser>> getMembersForCurrentGroup(
-    FirestoreUser? lastLoadedMember,
-    int pageSize,
-  ) async {
-    List<String> ids;
-    var query = _firestore
-        .collection("groups")
-        .doc(_currentGroupProviderItem!.group.id!)
-        .collection("members");
-    if (lastLoadedMember == null) {
-      ids = await query.limit(pageSize).get().then((snapshot) async {
-        List<String> ids = [];
-        for (final doc in snapshot.docs) {
-          ids.add(doc.id);
-        }
-        return ids;
-      });
-    } else {
-      ids = await query
-          .startAfter([lastLoadedMember.id])
-          .limit(pageSize)
-          .get()
-          .then((snapshot) async {
-            List<String> ids = [];
-            for (final doc in snapshot.docs) {
-              ids.add(doc.id);
-            }
-            return ids;
-          });
-    }
-
-    List<FirestoreUser> newlyLoadedMembers = [];
-    for (var userId in ids) {
-      var json = await _firestore
-          .collection("users")
-          .doc(userId)
-          .get()
-          .then((snapshot) => snapshot.data());
-
-      if (json != null) {
-        json["id"] = userId;
-        var member = FirestoreUser.fromJson(json);
-        newlyLoadedMembers.add(member);
-      }
-    }
-    return newlyLoadedMembers;
+    enhancedGroupList = [];
   }
 }

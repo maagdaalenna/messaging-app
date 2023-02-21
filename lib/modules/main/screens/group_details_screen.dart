@@ -1,7 +1,8 @@
 import 'package:Fam.ly/modules/main/classes/firestore_user_item.dart';
 import 'package:Fam.ly/modules/main/classes/group.dart';
-import 'package:Fam.ly/modules/main/providers/groups_provider.dart';
-import 'package:Fam.ly/modules/main/providers/join_create_group_provider.dart';
+import 'package:Fam.ly/modules/main/providers/group_list_provider.dart';
+import 'package:Fam.ly/modules/main/providers/group_provider.dart';
+import 'package:Fam.ly/modules/main/providers/group_operations_provider.dart';
 import 'package:Fam.ly/modules/main/widgets/member_tile.dart';
 import 'package:Fam.ly/modules/shared/classes/firestore_user.dart';
 import 'package:Fam.ly/modules/shared/themes/extensions/theme_sizes_extension.dart';
@@ -19,43 +20,12 @@ class GroupDetailsScreen extends StatefulWidget {
 }
 
 class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
-  late GroupsProvider _groupsProvider;
-  late JoinCreateGroupProvider _joinCreateGroupProvider;
+  late GroupListProvider _groupListProvider;
+  late GroupProvider _groupProvider;
+  late GroupOperationsProvider _joinCreateGroupProvider;
   PagingController<FirestoreUser?, FirestoreUserItem> _pagingController =
       PagingController(firstPageKey: null);
-  final _pageSize = 15;
-
-  Future<void> _fetchPage(
-    FirestoreUser? pageKey,
-  ) async {
-    try {
-      final newMembers = await _groupsProvider.getMembersForCurrentGroup(
-        pageKey,
-        _pageSize,
-      );
-
-      List<FirestoreUserItem> newFirestoreUserItems = [];
-
-      for (FirestoreUser member in newMembers) {
-        newFirestoreUserItems.add(
-          FirestoreUserItem(
-            firestoreUser: member,
-          ),
-        );
-      }
-      setState(() {
-        final isLastPage = newMembers.length < _pageSize;
-        if (isLastPage) {
-          _pagingController.appendLastPage(newFirestoreUserItems);
-        } else {
-          final nextPageKey = newMembers.last;
-          _pagingController.appendPage(newFirestoreUserItems, nextPageKey);
-        }
-      });
-    } catch (error) {
-      _pagingController.error = error;
-    }
-  }
+  final int _pageSize = 15;
 
   @override
   void initState() {
@@ -69,7 +39,8 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final themeSizes = theme.extension<ThemeSizesExtension>()!;
-    _groupsProvider = Provider.of(context);
+    _groupListProvider = Provider.of(context);
+    _groupProvider = Provider.of(context);
     _joinCreateGroupProvider = Provider.of(context);
 
     return Scaffold(
@@ -89,7 +60,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
             padding: EdgeInsets.only(right: themeSizes.spacingMedium),
             child: IconButton(
               onPressed: () {
-                Group group = _groupsProvider.currentGroup!;
+                Group group = _groupProvider.currentGroup!;
                 showDialog(
                   context: context,
                   builder: (BuildContext context) {
@@ -110,7 +81,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                             _joinCreateGroupProvider.leaveGroup(group.id!).then(
                               (value) {
                                 if (_joinCreateGroupProvider.error == null) {
-                                  _groupsProvider.removeGroup(group);
+                                  _groupListProvider.removeGroup(group);
                                   Navigator.of(context).pop();
                                   showDialog(
                                     context: context,
@@ -153,7 +124,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
         ],
         backgroundColor: theme.colorScheme.primary,
         title: Text(
-          _groupsProvider.currentGroup!.name,
+          _groupProvider.currentGroup!.name,
           style: TextStyle(
             color: theme.colorScheme.onPrimary,
             fontSize: themeSizes.iconSmall,
@@ -178,7 +149,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                 right: themeSizes.spacingMedium,
               ),
               child: Text(
-                _groupsProvider.currentGroup!.name,
+                _groupProvider.currentGroup!.name,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: theme.colorScheme.onPrimary,
@@ -222,5 +193,37 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _fetchPage(
+    FirestoreUser? pageKey,
+  ) async {
+    try {
+      final newMembers = await _groupProvider.getMembersForCurrentGroup(
+        pageKey,
+        _pageSize,
+      );
+
+      List<FirestoreUserItem> newFirestoreUserItems = [];
+
+      for (FirestoreUser member in newMembers) {
+        newFirestoreUserItems.add(
+          FirestoreUserItem(
+            firestoreUser: member,
+          ),
+        );
+      }
+      setState(() {
+        final isLastPage = newMembers.length < _pageSize;
+        if (isLastPage) {
+          _pagingController.appendLastPage(newFirestoreUserItems);
+        } else {
+          final nextPageKey = newMembers.last;
+          _pagingController.appendPage(newFirestoreUserItems, nextPageKey);
+        }
+      });
+    } catch (error) {
+      _pagingController.error = error;
+    }
   }
 }

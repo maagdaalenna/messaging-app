@@ -1,4 +1,5 @@
-import 'package:Fam.ly/modules/main/providers/groups_provider.dart';
+import 'package:Fam.ly/modules/main/providers/group_list_provider.dart';
+import 'package:Fam.ly/modules/main/providers/group_provider.dart';
 import 'package:Fam.ly/modules/main/screens/group_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
@@ -16,7 +17,7 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  late GroupsProvider _groupsProvider;
+  late GroupProvider _groupProvider;
   final _messageController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
@@ -24,7 +25,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final themeSizes = theme.extension<ThemeSizesExtension>()!;
-    _groupsProvider = Provider.of(context);
+    _groupProvider = Provider.of(context);
 
     return Scaffold(
       backgroundColor: theme.colorScheme.background,
@@ -57,7 +58,7 @@ class _ChatScreenState extends State<ChatScreen> {
             );
           },
           child: Text(
-            _groupsProvider.currentGroup!.name,
+            _groupProvider.currentGroup!.name,
             style: TextStyle(
               color: theme.colorScheme.onPrimary,
               fontSize: themeSizes.iconSmall,
@@ -70,10 +71,9 @@ class _ChatScreenState extends State<ChatScreen> {
       body: Column(
         children: [
           Expanded(
-            child: (_groupsProvider.currentPagingController!.itemList == null
+            child: (_groupProvider.currentPagingController!.itemList == null
                     ? false
-                    : _groupsProvider
-                        .currentPagingController!.itemList!.isEmpty)
+                    : _groupProvider.currentPagingController!.itemList!.isEmpty)
                 ? Padding(
                     padding: EdgeInsets.all(themeSizes.spacingLarge),
                     child: Center(
@@ -89,7 +89,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   )
                 : PagedListView<GroupMessage?, MessageItem>(
                     reverse: true,
-                    pagingController: _groupsProvider.currentPagingController!,
+                    pagingController: _groupProvider.currentPagingController!,
                     builderDelegate: PagedChildBuilderDelegate<MessageItem>(
                       itemBuilder: (context, messageItem, index) => MessageTile(
                         onRight: messageItem.isFromCurrentUser,
@@ -147,10 +147,10 @@ class _ChatScreenState extends State<ChatScreen> {
                       if (_formKey.currentState!.validate()) {
                         var groupMessage = GroupMessage(
                           body: _messageController.text,
-                          from: _groupsProvider.currentUser,
+                          from: _groupProvider.currentUser,
                           datetime: DateTime.now(),
                         );
-                        _groupsProvider.addMessageForCurrentGroup(groupMessage);
+                        _groupProvider.addMessageForCurrentGroup(groupMessage);
                         _messageController.clear();
                       }
                     },

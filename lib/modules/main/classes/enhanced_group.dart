@@ -6,12 +6,12 @@ import 'package:Fam.ly/modules/main/classes/message_item.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
-class GroupProviderItem {
+class EnhancedGroup {
   final Group group;
   final PagingController<GroupMessage?, MessageItem> pagingController;
   StreamSubscription<QuerySnapshot>? eventsSubscription;
 
-  GroupProviderItem({
+  EnhancedGroup({
     required this.group,
     required this.pagingController,
     this.eventsSubscription,

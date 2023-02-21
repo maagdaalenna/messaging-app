@@ -1,9 +1,9 @@
-import 'package:Fam.ly/modules/main/classes/group_provider_item.dart';
+import 'package:Fam.ly/modules/main/classes/enhanced_group.dart';
+import 'package:Fam.ly/modules/main/providers/group_provider.dart';
 import 'package:Fam.ly/modules/main/screens/join_or_create_group_screen.dart';
 import 'package:Fam.ly/modules/main/widgets/group_tile.dart';
-import 'package:Fam.ly/modules/shared/widgets/placeholder_profile_picture.dart';
 import 'package:flutter/material.dart';
-import 'package:Fam.ly/modules/main/providers/groups_provider.dart';
+import 'package:Fam.ly/modules/main/providers/group_list_provider.dart';
 import 'package:Fam.ly/modules/main/screens/chat_screen.dart';
 import 'package:Fam.ly/modules/shared/themes/extensions/theme_sizes_extension.dart';
 import 'package:provider/provider.dart';
@@ -16,17 +16,19 @@ class FamilyChatsScreen extends StatefulWidget {
 }
 
 class _FamilyChatsScreenState extends State<FamilyChatsScreen> {
-  late GroupsProvider _groupsProvider;
+  late GroupListProvider _groupListProvider;
+  late GroupProvider _groupProvider;
   bool isFirstBuild = true;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final themeSizes = theme.extension<ThemeSizesExtension>()!;
-    _groupsProvider = Provider.of(context);
+    _groupListProvider = Provider.of(context);
+    _groupProvider = Provider.of(context);
 
     if (isFirstBuild) {
-      _groupsProvider.loadGroupsForCurrentUser();
+      _groupListProvider.loadGroupsForCurrentUser();
       isFirstBuild = false;
     }
 
@@ -43,8 +45,8 @@ class _FamilyChatsScreenState extends State<FamilyChatsScreen> {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
-      body: (_groupsProvider.groupProviderItemList.isEmpty &&
-              _groupsProvider.lastGroupLoaded)
+      body: (_groupListProvider.enhancedGroupList.isEmpty &&
+              _groupListProvider.lastGroupLoaded)
           ? Padding(
               padding: EdgeInsets.all(themeSizes.spacingLarge),
               child: Center(
@@ -62,22 +64,21 @@ class _FamilyChatsScreenState extends State<FamilyChatsScreen> {
               children: [
                 ListView.builder(
                     shrinkWrap: true,
-                    itemCount: _groupsProvider.groupProviderItemList.length,
+                    itemCount: _groupListProvider.enhancedGroupList.length,
                     itemBuilder: (BuildContext context, int index) {
-                      GroupProviderItem groupProviderItem =
-                          _groupsProvider.groupProviderItemList[index];
+                      EnhancedGroup groupProviderItem =
+                          _groupListProvider.enhancedGroupList[index];
                       return GroupTile(
                         name: groupProviderItem.group.name,
-                        fromAndBody: _groupsProvider
-                                    .groupProviderItemList[index]
-                                    .lastMessageItem ==
+                        fromAndBody: _groupListProvider
+                                    .enhancedGroupList[index].lastMessageItem ==
                                 null
                             ? "No messages."
-                            : _groupsProvider
-                                .groupProviderItemList[index].lastMessageItem!
+                            : _groupListProvider
+                                .enhancedGroupList[index].lastMessageItem!
                                 .showFromAndBody(),
                         onTap: () {
-                          _groupsProvider.initialise(groupProviderItem);
+                          _groupProvider.initialise(groupProviderItem);
                           Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (context) => const ChatScreen(),
@@ -86,7 +87,7 @@ class _FamilyChatsScreenState extends State<FamilyChatsScreen> {
                         },
                       );
                     }),
-                if (!_groupsProvider.lastGroupLoaded)
+                if (!_groupListProvider.lastGroupLoaded)
                   Padding(
                     padding: EdgeInsets.all(themeSizes.spacingSmall),
                     child: CircularProgressIndicator(),
@@ -116,7 +117,7 @@ class _FamilyChatsScreenState extends State<FamilyChatsScreen> {
 
   @override
   void dispose() {
-    _groupsProvider.disposeEverything();
+    _groupListProvider.disposeEverything();
     super.dispose();
   }
 }

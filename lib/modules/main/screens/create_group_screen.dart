@@ -1,6 +1,6 @@
 import 'package:Fam.ly/modules/main/classes/group.dart';
-import 'package:Fam.ly/modules/main/providers/groups_provider.dart';
-import 'package:Fam.ly/modules/main/providers/join_create_group_provider.dart';
+import 'package:Fam.ly/modules/main/providers/group_list_provider.dart';
+import 'package:Fam.ly/modules/main/providers/group_operations_provider.dart';
 import 'package:Fam.ly/modules/shared/themes/extensions/theme_sizes_extension.dart';
 import 'package:Fam.ly/modules/shared/widgets/famly_logo.dart';
 import 'package:flutter/material.dart';
@@ -15,8 +15,8 @@ class CreateGroupScreen extends StatefulWidget {
 }
 
 class _CreateGroupScreenState extends State<CreateGroupScreen> {
-  late JoinCreateGroupProvider _joinCreateGroupProvider;
-  late GroupsProvider _groupsProvider;
+  late GroupOperationsProvider _joinCreateGroupProvider;
+  late GroupListProvider _groupsProvider;
   final _formKey = GlobalKey<FormState>();
   final _familyNameController = TextEditingController();
 
