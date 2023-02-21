@@ -112,7 +112,7 @@ class GroupsProvider extends ChangeNotifier {
     });
     json["from"] = userJson != null
         ? FirestoreUser.fromJson(userJson)
-        : FirestoreUser(id: "", displayName: "Deleted Account", email: "");
+        : FirestoreUser.deletedAccount;
 
     return json;
   }
@@ -260,54 +260,6 @@ class GroupsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<List<FirestoreUser>> getMembersForCurrentGroup(
-    FirestoreUser? lastLoadedMember,
-    int pageSize,
-  ) async {
-    List<String> ids;
-    var query = _firestore
-        .collection("groups")
-        .doc(_currentGroupProviderItem!.group.id!)
-        .collection("members");
-    if (lastLoadedMember == null) {
-      ids = await query.limit(pageSize).get().then((snapshot) async {
-        List<String> ids = [];
-        for (final doc in snapshot.docs) {
-          ids.add(doc.id);
-        }
-        return ids;
-      });
-    } else {
-      ids = await query
-          .startAfter([lastLoadedMember.id])
-          .limit(pageSize)
-          .get()
-          .then((snapshot) async {
-            List<String> ids = [];
-            for (final doc in snapshot.docs) {
-              ids.add(doc.id);
-            }
-            return ids;
-          });
-    }
-
-    List<FirestoreUser> newlyLoadedMembers = [];
-    for (var userId in ids) {
-      var json = await _firestore
-          .collection("users")
-          .doc(userId)
-          .get()
-          .then((snapshot) => snapshot.data());
-
-      if (json != null) {
-        json["id"] = userId;
-        var member = FirestoreUser.fromJson(json);
-        newlyLoadedMembers.add(member);
-      }
-    }
-    return newlyLoadedMembers;
-  }
-
   Future<List<GroupMessage>> getMessagesForGroup(
     String groupId,
     GroupMessage? lastMessage,
@@ -387,5 +339,53 @@ class GroupsProvider extends ChangeNotifier {
     _currentGroupProviderItem = null;
     lastGroupLoaded = false;
     groupProviderItemList = [];
+  }
+
+  Future<List<FirestoreUser>> getMembersForCurrentGroup(
+    FirestoreUser? lastLoadedMember,
+    int pageSize,
+  ) async {
+    List<String> ids;
+    var query = _firestore
+        .collection("groups")
+        .doc(_currentGroupProviderItem!.group.id!)
+        .collection("members");
+    if (lastLoadedMember == null) {
+      ids = await query.limit(pageSize).get().then((snapshot) async {
+        List<String> ids = [];
+        for (final doc in snapshot.docs) {
+          ids.add(doc.id);
+        }
+        return ids;
+      });
+    } else {
+      ids = await query
+          .startAfter([lastLoadedMember.id])
+          .limit(pageSize)
+          .get()
+          .then((snapshot) async {
+            List<String> ids = [];
+            for (final doc in snapshot.docs) {
+              ids.add(doc.id);
+            }
+            return ids;
+          });
+    }
+
+    List<FirestoreUser> newlyLoadedMembers = [];
+    for (var userId in ids) {
+      var json = await _firestore
+          .collection("users")
+          .doc(userId)
+          .get()
+          .then((snapshot) => snapshot.data());
+
+      if (json != null) {
+        json["id"] = userId;
+        var member = FirestoreUser.fromJson(json);
+        newlyLoadedMembers.add(member);
+      }
+    }
+    return newlyLoadedMembers;
   }
 }

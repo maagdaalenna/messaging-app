@@ -2,10 +2,10 @@ import 'package:Fam.ly/modules/shared/classes/firestore_user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class GroupMessage {
-  final String? id;
-  String body;
-  FirestoreUser from;
-  DateTime datetime;
+  String? id;
+  final String body;
+  final FirestoreUser from;
+  final DateTime datetime;
 
   GroupMessage({
     this.id,

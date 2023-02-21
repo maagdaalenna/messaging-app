@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 
 class FirestoreUser {
-  final String? id;
+  String? id;
   final String displayName;
   final String email;
 
@@ -10,6 +10,10 @@ class FirestoreUser {
     required this.displayName,
     required this.email,
   });
+
+  static FirestoreUser get deletedAccount {
+    return FirestoreUser(id: "", displayName: "Deleted Account", email: "");
+  }
 
   static FirestoreUser fromUser(User user) {
     return FirestoreUser(

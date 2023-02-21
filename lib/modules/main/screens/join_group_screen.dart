@@ -87,9 +87,11 @@ class _JoinGroupScreenState extends State<JoinGroupScreen> {
                           ? () {}
                           : () {
                               if (_formKey.currentState!.validate()) {
-                                String gid = _familyCodeController.text;
+                                String groupId = _familyCodeController.text;
                                 _familyCodeController.clear();
-                                _joinCreateGroupProvider.joinGroup(gid).then(
+                                _joinCreateGroupProvider
+                                    .joinGroup(groupId)
+                                    .then(
                                   (value) {
                                     if (_joinCreateGroupProvider.error ==
                                         null) {
