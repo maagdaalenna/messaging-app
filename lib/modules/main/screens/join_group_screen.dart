@@ -15,7 +15,7 @@ class JoinGroupScreen extends StatefulWidget {
 
 class _JoinGroupScreenState extends State<JoinGroupScreen> {
   late GroupOperationsProvider _joinCreateGroupProvider;
-  late GroupListProvider _groupsProvider;
+  late GroupListProvider _groupListProvider;
   final _formKey = GlobalKey<FormState>();
   final _familyCodeController = TextEditingController();
 
@@ -24,7 +24,7 @@ class _JoinGroupScreenState extends State<JoinGroupScreen> {
     final theme = Theme.of(context);
     final themeSizes = theme.extension<ThemeSizesExtension>()!;
     _joinCreateGroupProvider = Provider.of(context);
-    _groupsProvider = Provider.of(context);
+    _groupListProvider = Provider.of(context);
 
     return SingleChildScrollView(
       child: Padding(
@@ -97,7 +97,7 @@ class _JoinGroupScreenState extends State<JoinGroupScreen> {
                                         null) {
                                       Group group = _joinCreateGroupProvider
                                           .result! as Group;
-                                      _groupsProvider.addGroup(group);
+                                      _groupListProvider.addGroup(group);
                                       showDialog(
                                         context: context,
                                         builder: (BuildContext context) {

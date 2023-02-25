@@ -17,8 +17,8 @@ class GroupListProvider extends ChangeNotifier {
   bool loading = false;
   String? error = null;
 
-  // 30 messages per page
-  final int _pageSize = 30;
+  // 10 messages per page
+  final int _pageSize = 10;
 
   bool lastGroupLoaded = false;
 

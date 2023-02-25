@@ -74,7 +74,8 @@ class GroupProvider extends ChangeNotifier {
     var query = _firestore
         .collection("groups")
         .doc(_currentEnhancedGroup!.group.id!)
-        .collection("members");
+        .collection("members")
+        .orderBy(FieldPath.documentId);
     if (lastLoadedMember == null) {
       ids = await query.limit(pageSize).get().then((snapshot) async {
         List<String> ids = [];

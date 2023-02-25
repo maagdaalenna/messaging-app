@@ -25,7 +25,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
   late GroupOperationsProvider _joinCreateGroupProvider;
   PagingController<FirestoreUser?, FirestoreUserItem> _pagingController =
       PagingController(firstPageKey: null);
-  final int _pageSize = 15;
+  final int _pageSize = 10;
 
   @override
   void initState() {
